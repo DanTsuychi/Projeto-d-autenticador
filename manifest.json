@@ -1,0 +1,19 @@
+{
+  "name": "Projeto D Autenticador",
+  "short_name": "Projeto D",
+  "description": "Autenticação de ingressos e controle de entrada do Projeto D.",
+  "lang": "pt-BR",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#050505",
+  "theme_color": "#050505",
+  "icons": [
+    {
+      "src": "./assets/logo.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
