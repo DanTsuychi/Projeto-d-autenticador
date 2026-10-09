@@ -329,13 +329,15 @@
   });
 
   if (!configIsReady()) {
-    setMessage(authMessage, "Antes de usar: edite config.js e informe a Project URL e a chave pública do Supabase.");
+    // Não exibe aviso automaticamente na tela inicial.
+    // A validação continua em handleAuthSubmit().
   } else if (!window.supabase || typeof window.supabase.createClient !== "function") {
     setMessage(authMessage, "Não foi possível carregar a conexão do Supabase. Verifique sua internet.");
   } else {
     supabase = window.supabase.createClient(config.supabaseUrl, config.supabaseKey, {
       auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
     });
+
     supabase.auth.onAuthStateChange((event) => {
       if (event === "SIGNED_OUT") {
         currentUser = null;
@@ -343,6 +345,7 @@
         showAuth();
       }
     });
+
     supabase.auth.getSession().then(({ data }) => {
       if (data.session) loadProfileAndRender().catch((error) => {
         showApp();
