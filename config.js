@@ -5,6 +5,6 @@
   NUNCA coloque aqui service_role ou uma chave secret.
 */
 window.PROJETO_D_CONFIG = {
-  supabaseUrl: "COLE_AQUI_A_PROJECT_URL",
-  supabaseKey: "COLE_AQUI_A_CHAVE_PUBLICA"
+  supabaseUrl: "https://wwuwrzzkiyjhgevgtdqv.supabase.co",
+  supabaseKey: "sb_publishable_C4QG_5X6G4wBzkvx8HGFTw_suWEnDYV"
 };
