@@ -1,451 +1,161 @@
-/* ========================================================
-   PROJETO D — APLICAÇÃO PRINCIPAL (app.js)
-   Ajustado estritamente aos IDs e bibliotecas do index.html
-   ======================================================== */
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#050505">
+  <meta name="description" content="Projeto D — autenticação de ingressos e acesso ao evento.">
+  <title>Projeto D | Autenticador</title>
+  <link rel="icon" type="image/png" href="./assets/logo.png">
+  <link rel="manifest" href="./manifest.json">
+  <link rel="stylesheet" href="./styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="ambient ambient-one"></div>
+  <div class="ambient ambient-two"></div>
+  <div class="scanlines"></div>
 
-(function () {
-  // 1. CONFIGURAÇÃO E INICIALIZAÇÃO DO SUPABASE
-  const config = window.PROJETO_D_CONFIG || {};
-  if (!config.supabaseUrl || !config.supabaseKey) {
-    showAuthMessage("Erro: configure a URL e a chave pública em config.js.");
-    return;
-  }
+  <header class="topbar">
+    <a class="brand" href="./" aria-label="Projeto D início">
+      <img src="./assets/logo.png" alt="Logo da festa" class="brand-logo" onerror="this.style.display='none'">
+      <span class="brand-fallback">PROJETO <b>D</b></span>
+    </a>
+    <span class="system-status"><i></i> SISTEMA DE ACESSO</span>
+  </header>
 
-  const supabase = window.supabase.createClient(config.supabaseUrl, config.supabaseKey);
+  <main class="shell">
+    <section id="authView" class="auth-layout">
+      <div class="hero-copy">
+        <p class="eyebrow">EVENT ACCESS PROTOCOL // 001</p>
+        <h1>SEU ACESSO.<br><span>SUA NOITE.</span></h1>
+        <p class="hero-description">Autentique seu ingresso e mantenha seu acesso pronto para a entrada do evento.</p>
+        <div class="hero-lines"><span></span><span></span><span></span><span></span><span></span></div>
+        <p class="microcopy">SECURE ENTRY // ONE TICKET · ONE ENTRY</p>
+      </div>
 
-  // Modo de autenticação ativo ('login' ou 'signup')
-  let authMode = "login";
-  let html5QrcodeScanner = null;
+      <div class="panel auth-panel">
+        <div class="panel-heading">
+          <span class="panel-kicker">IDENTIFICAÇÃO</span>
+          <span class="live-dot">ONLINE</span>
+        </div>
+        <div class="tabs" role="tablist" aria-label="Autenticação">
+          <button class="tab active" id="loginTab" type="button">ENTRAR</button>
+          <button class="tab" id="signupTab" type="button">CRIAR CONTA</button>
+        </div>
+        <form id="authForm">
+          <label for="displayName" id="displayNameLabel" class="hidden">Nome completo</label>
+          <input id="displayName" name="displayName" type="text" autocomplete="name" placeholder="NOME COMPLETO" class="hidden" maxlength="100">
+          <label for="email">E-MAIL</label>
+          <input id="email" name="email" type="email" autocomplete="email" placeholder="voce@exemplo.com" required>
+          <label for="password">SENHA</label>
+          <input id="password" name="password" type="password" autocomplete="current-password" placeholder="MÍNIMO DE 8 CARACTERES" minlength="8" required>
+          <button class="button primary full" type="submit" id="authSubmit">ENTRAR NO SISTEMA <span>↗</span></button>
+        </form>
+        <p id="authMessage" class="message" role="status" aria-live="polite"></p>
+        <p class="fine-print">O acesso é individual. Não compartilhe seu QR Code.</p>
+      </div>
+    </section>
 
-  // 2. ELEMENTOS DO DOM (MAPEADOS CONFORME O INDEX.HTML)
-  const elements = {
-    // Seções
-    authView: document.getElementById("authView"),
-    appView: document.getElementById("appView"),
+    <section id="appView" class="hidden">
+      <div class="dashboard-header">
+        <div>
+          <p class="eyebrow">PAINEL DE CONTROLE</p>
+          <h1 id="welcomeTitle">BEM-VINDO.</h1>
+          <p id="roleCaption" class="muted">Acesso autenticado.</p>
+        </div>
+        <button id="logoutButton" class="button ghost" type="button">SAIR ↗</button>
+      </div>
 
-    // Formulário de Autenticação
-    loginTab: document.getElementById("loginTab"),
-    signupTab: document.getElementById("signupTab"),
-    authForm: document.getElementById("authForm"),
-    displayName: document.getElementById("displayName"),
-    displayNameLabel: document.getElementById("displayNameLabel"),
-    email: document.getElementById("email"),
-    password: document.getElementById("password"),
-    authSubmit: document.getElementById("authSubmit"),
-    authMessage: document.getElementById("authMessage"),
+      <section id="guestPanel" class="hidden">
+        <div class="section-heading">
+          <div><p class="eyebrow">ÁREA DO CONVIDADO</p><h2>SEU INGRESSO</h2></div>
+          <span class="status-pill" id="guestStatus">AGUARDANDO</span>
+        </div>
+        <div id="noTicketCard" class="panel claim-panel">
+          <div class="claim-symbol">＋</div>
+          <div class="claim-copy">
+            <h3>VOCÊ TEM UM CÓDIGO?</h3>
+            <p class="muted">Digite o código de 9 dígitos recebido após a compra do ingresso.</p>
+          </div>
+          <form id="claimForm" class="claim-form">
+            <label for="ticketCode">CÓDIGO DE ACESSO</label>
+            <input id="ticketCode" inputmode="numeric" autocomplete="one-time-code" maxlength="9" pattern="[0-9]{9}" placeholder="000 000 000" required>
+            <button class="button primary full" type="submit">RESGATAR INGRESSO ↗</button>
+          </form>
+        </div>
+        <div id="ticketCard" class="panel ticket-card hidden">
+          <div class="ticket-top"><span class="panel-kicker">PROJETO D / DIGITAL PASS</span><span class="ticket-stamp">VALIDAÇÃO ÚNICA</span></div>
+          <div class="ticket-main">
+            <div class="ticket-details">
+              <p class="eyebrow">TITULAR DO INGRESSO</p>
+              <h2 id="ticketGuestName">CONVIDADO</h2>
+              <p class="muted">Apresente este QR Code na entrada oficial.</p>
+              <p id="ticketIdLabel" class="ticket-id"></p>
+              <div id="ticketUsedNotice" class="used-notice hidden">ESTE INGRESSO JÁ FOI UTILIZADO</div>
+            </div>
+            <div class="qr-frame"><div id="qrCode" aria-label="QR Code do ingresso"></div><span>SCAN TO ENTER</span></div>
+          </div>
+          <p class="fine-print">O QR Code é pessoal. Uma vez validado pela equipe, não poderá ser usado novamente.</p>
+        </div>
+      </section>
 
-    // Header do Dashboard
-    welcomeTitle: document.getElementById("welcomeTitle"),
-    roleCaption: document.getElementById("roleCaption"),
-    logoutButton: document.getElementById("logoutButton"),
+      <section id="adminPanel" class="hidden">
+        <div class="section-heading">
+          <div><p class="eyebrow">NÍVEL DE ACESSO // ADMIN</p><h2>CONTROLE DE ENTRADA</h2></div>
+          <span class="status-pill admin-pill">ADMINISTRADOR</span>
+        </div>
+        <div class="admin-grid">
+          <div class="panel">
+            <div class="panel-heading"><span class="panel-kicker">01 / NOVO INGRESSO</span></div>
+            <h3>GERAR CÓDIGO</h3>
+            <p class="muted">Crie um ingresso e entregue o código de resgate ao convidado.</p>
+            <form id="createTicketForm">
+              <label for="guestName">NOME DO CONVIDADO</label>
+              <input id="guestName" maxlength="100" placeholder="NOME COMPLETO" required>
+              <button class="button primary full" type="submit">GERAR INGRESSO ↗</button>
+            </form>
+            <div id="newCodeResult" class="code-result hidden">
+              <p class="eyebrow">CÓDIGO GERADO — MOSTRADO UMA VEZ</p>
+              <strong id="newCode"></strong>
+              <button id="copyCodeButton" class="button ghost full" type="button">COPIAR CÓDIGO</button>
+              <p class="fine-print">Envie este código apenas ao convidado correto. Ele não poderá ser exibido novamente.</p>
+            </div>
+          </div>
+          <div class="panel scanner-panel">
+            <div class="panel-heading"><span class="panel-kicker">02 / VALIDAR ENTRADA</span></div>
+            <h3>LEITOR DE QR CODE</h3>
+            <p class="muted">Permita o acesso à câmera e enquadre o QR Code do ingresso.</p>
+            <div id="reader" class="reader"></div>
+            <div class="scanner-actions">
+              <button id="startScannerButton" class="button primary" type="button">ATIVAR CÂMERA</button>
+              <button id="stopScannerButton" class="button ghost" type="button" disabled>PARAR</button>
+            </div>
+            <div id="scanResult" class="scan-result" role="status" aria-live="polite">LEITOR DESATIVADO</div>
+          </div>
+        </div>
+        <div class="panel table-panel">
+          <div class="panel-heading"><span class="panel-kicker">03 / REGISTRO DE INGRESSOS</span><button id="refreshTicketsButton" class="button ghost small" type="button">ATUALIZAR ↻</button></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>CONVIDADO</th><th>STATUS</th><th>CRIADO EM</th><th>UTILIZADO EM</th></tr></thead>
+              <tbody id="ticketsTableBody"><tr><td colspan="4" class="muted">Carregando registros…</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+      <p id="appMessage" class="message" role="status" aria-live="polite"></p>
+    </section>
+  </main>
 
-    // Painel Convidado
-    guestPanel: document.getElementById("guestPanel"),
-    guestStatus: document.getElementById("guestStatus"),
-    noTicketCard: document.getElementById("noTicketCard"),
-    ticketCard: document.getElementById("ticketCard"),
-    claimForm: document.getElementById("claimForm"),
-    ticketCode: document.getElementById("ticketCode"),
-    ticketGuestName: document.getElementById("ticketGuestName"),
-    ticketIdLabel: document.getElementById("ticketIdLabel"),
-    ticketUsedNotice: document.getElementById("ticketUsedNotice"),
-    qrCode: document.getElementById("qrCode"),
+  <footer class="footer"><span>PROJETO D</span><span>ACCESS CONTROL SYSTEM <b>●</b></span></footer>
 
-    // Painel Admin
-    adminPanel: document.getElementById("adminPanel"),
-    createTicketForm: document.getElementById("createTicketForm"),
-    guestName: document.getElementById("guestName"),
-    newCodeResult: document.getElementById("newCodeResult"),
-    newCode: document.getElementById("newCode"),
-    copyCodeButton: document.getElementById("copyCodeButton"),
-    startScannerButton: document.getElementById("startScannerButton"),
-    stopScannerButton: document.getElementById("stopScannerButton"),
-    scanResult: document.getElementById("scanResult"),
-    refreshTicketsButton: document.getElementById("refreshTicketsButton"),
-    ticketsTableBody: document.getElementById("ticketsTableBody"),
-    appMessage: document.getElementById("appMessage")
-  };
-
-  // 3. INICIALIZAÇÃO DA APLICAÇÃO
-  document.addEventListener("DOMContentLoaded", initApp);
-
-  async function initApp() {
-    setupEventListeners();
-    await checkSession();
-  }
-
-  function setupEventListeners() {
-    // Alternância de Abas (Entrar / Criar Conta)
-    if (elements.loginTab) elements.loginTab.addEventListener("click", () => switchAuthTab("login"));
-    if (elements.signupTab) elements.signupTab.addEventListener("click", () => switchAuthTab("signup"));
-
-    // Submissão de Autenticação
-    if (elements.authForm) elements.authForm.addEventListener("submit", handleAuthSubmit);
-    if (elements.logoutButton) elements.logoutButton.addEventListener("click", handleLogout);
-
-    // Convidado
-    if (elements.claimForm) elements.claimForm.addEventListener("submit", handleClaimTicket);
-
-    // Admin
-    if (elements.createTicketForm) elements.createTicketForm.addEventListener("submit", handleCreateTicket);
-    if (elements.copyCodeButton) elements.copyCodeButton.addEventListener("click", handleCopyCode);
-    if (elements.refreshTicketsButton) elements.refreshTicketsButton.addEventListener("click", loadAdminTicketList);
-
-    // Câmera / Leitor QR Code
-    if (elements.startScannerButton) elements.startScannerButton.addEventListener("click", startCameraScanner);
-    if (elements.stopScannerButton) elements.stopScannerButton.addEventListener("click", stopCameraScanner);
-
-    // Escuta mudanças no estado de autenticação
-    supabase.auth.onAuthStateChange((event, session) => {
-      if (session) {
-        loadUserProfile();
-      } else {
-        showAuthView();
-      }
-    });
-  }
-
-  // 4. AUTENTICAÇÃO
-  function switchAuthTab(mode) {
-    authMode = mode;
-    clearAuthMessage();
-
-    if (mode === "login") {
-      elements.loginTab.classList.add("active");
-      elements.signupTab.classList.remove("active");
-      elements.displayName.classList.add("hidden");
-      elements.displayNameLabel.classList.add("hidden");
-      elements.displayName.required = false;
-      elements.authSubmit.innerHTML = 'ENTRAR NO SISTEMA <span>↗</span>';
-    } else {
-      elements.signupTab.classList.add("active");
-      elements.loginTab.classList.remove("active");
-      elements.displayName.classList.remove("hidden");
-      elements.displayNameLabel.classList.remove("hidden");
-      elements.displayName.required = true;
-      elements.authSubmit.innerHTML = 'CRIAR CONTA <span>↗</span>';
-    }
-  }
-
-  async function handleAuthSubmit(e) {
-    e.preventDefault();
-    clearAuthMessage();
-
-    const emailVal = elements.email.value.trim();
-    const passVal = elements.password.value;
-    const nameVal = elements.displayName.value.trim();
-
-    elements.authSubmit.disabled = true;
-
-    try {
-      if (authMode === "login") {
-        const { error } = await supabase.auth.signInWithPassword({
-          email: emailVal,
-          password: passVal
-        });
-        if (error) throw error;
-      } else {
-        const { error } = await supabase.auth.signUp({
-          email: emailVal,
-          password: passVal,
-          options: {
-            data: { display_name: nameVal || emailVal }
-          }
-        });
-        if (error) throw error;
-      }
-    } catch (err) {
-      showAuthMessage(err.message || "Erro na autenticação.");
-    } finally {
-      elements.authSubmit.disabled = false;
-    }
-  }
-
-  async function checkSession() {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session) {
-      await loadUserProfile();
-    } else {
-      showAuthView();
-    }
-  }
-
-  async function handleLogout() {
-    await stopCameraScanner();
-    await supabase.auth.signOut();
-    showAuthView();
-  }
-
-  // 5. NAVEGAÇÃO DE PAINÉIS
-  function showAuthView() {
-    elements.authView.classList.remove("hidden");
-    elements.appView.classList.add("hidden");
-  }
-
-  function showAppView() {
-    elements.authView.classList.add("hidden");
-    elements.appView.classList.remove("hidden");
-  }
-
-  async function loadUserProfile() {
-    try {
-      showAppView();
-      const { data, error } = await supabase.rpc("my_profile");
-      if (error) throw error;
-
-      const profile = data && data[0] ? data[0] : { display_name: "Convidado", user_role: "guest" };
-
-      if (elements.welcomeTitle) {
-        elements.welcomeTitle.textContent = `BEM-VINDO, ${profile.display_name.toUpperCase()}.`;
-      }
-      if (elements.roleCaption) {
-        elements.roleCaption.textContent = `Acesso autenticado // Nível: ${profile.user_role.toUpperCase()}`;
-      }
-
-      if (profile.user_role === "admin") {
-        elements.adminPanel.classList.remove("hidden");
-        elements.guestPanel.classList.add("hidden");
-        await loadAdminTicketList();
-      } else {
-        elements.guestPanel.classList.remove("hidden");
-        elements.adminPanel.classList.add("hidden");
-        await loadMyTicket();
-      }
-    } catch (err) {
-      console.error("Erro ao carregar perfil:", err);
-      elements.guestPanel.classList.remove("hidden");
-      elements.adminPanel.classList.add("hidden");
-    }
-  }
-
-  // 6. ÁREA DO CONVIDADO
-  async function loadMyTicket() {
-    try {
-      const { data, error } = await supabase.rpc("my_ticket");
-      if (error) throw error;
-
-      if (data && data.length > 0) {
-        renderTicketCard(data[0]);
-      } else {
-        renderNoTicketCard();
-      }
-    } catch (err) {
-      console.error("Erro ao carregar ingresso:", err);
-    }
-  }
-
-  function renderTicketCard(ticket) {
-    elements.noTicketCard.classList.add("hidden");
-    elements.ticketCard.classList.remove("hidden");
-
-    if (elements.ticketGuestName) elements.ticketGuestName.textContent = ticket.guest_name;
-    if (elements.guestStatus) elements.guestStatus.textContent = ticket.ticket_status.toUpperCase();
-    if (elements.ticketIdLabel) elements.ticketIdLabel.textContent = `ID: ${ticket.ticket_id.slice(0, 8)}...`;
-
-    if (ticket.ticket_status === "used") {
-      if (elements.ticketUsedNotice) elements.ticketUsedNotice.classList.remove("hidden");
-    } else {
-      if (elements.ticketUsedNotice) elements.ticketUsedNotice.classList.add("hidden");
-    }
-
-    // Renderização do QR Code com qrcodejs
-    if (elements.qrCode && window.QRCode) {
-      elements.qrCode.innerHTML = "";
-      const qrData = JSON.stringify({
-        ticket_id: ticket.ticket_id,
-        qr_token: ticket.qr_token
-      });
-      new window.QRCode(elements.qrCode, {
-        text: qrData,
-        width: 180,
-        height: 180,
-        colorDark: "#000000",
-        colorLight: "#ffffff",
-        correctLevel: window.QRCode.CorrectLevel.H
-      });
-    }
-  }
-
-  function renderNoTicketCard() {
-    elements.noTicketCard.classList.remove("hidden");
-    elements.ticketCard.classList.add("hidden");
-    if (elements.guestStatus) elements.guestStatus.textContent = "AGUARDANDO";
-  }
-
-  async function handleClaimTicket(e) {
-    e.preventDefault();
-    const code = elements.ticketCode.value.trim();
-    if (!code) return;
-
-    try {
-      const { error } = await supabase.rpc("claim_ticket", { p_code: code });
-      if (error) throw error;
-      alert("Ingresso resgatado com sucesso!");
-      elements.ticketCode.value = "";
-      await loadMyTicket();
-    } catch (err) {
-      alert(err.message || "Código inválido ou já resgatado.");
-    }
-  }
-
-  // 7. ÁREA DO ADMINISTRADOR
-  async function handleCreateTicket(e) {
-    e.preventDefault();
-    const name = elements.guestName.value.trim();
-    if (!name) return;
-
-    try {
-      const { data, error } = await supabase.rpc("create_ticket", { p_guest_name: name });
-      if (error) throw error;
-
-      const code = data && data[0] ? data[0].access_code : "CÓDIGO GERADO";
-      if (elements.newCode) elements.newCode.textContent = code;
-      if (elements.newCodeResult) elements.newCodeResult.classList.remove("hidden");
-
-      elements.guestName.value = "";
-      await loadAdminTicketList();
-    } catch (err) {
-      alert(err.message || "Erro ao gerar ingresso.");
-    }
-  }
-
-  function handleCopyCode() {
-    if (elements.newCode && elements.newCode.textContent) {
-      navigator.clipboard.writeText(elements.newCode.textContent).then(() => {
-        elements.copyCodeButton.textContent = "COPIADO! ✓";
-        setTimeout(() => {
-          elements.copyCodeButton.textContent = "COPIAR CÓDIGO";
-        }, 2000);
-      });
-    }
-  }
-
-  async function loadAdminTicketList() {
-    if (!elements.ticketsTableBody) return;
-
-    try {
-      const { data, error } = await supabase.rpc("admin_ticket_list");
-      if (error) throw error;
-
-      // Ajusta o cabeçalho da tabela para incluir a coluna de CÓDIGO DE ACESSO
-      const table = elements.ticketsTableBody.closest("table");
-      if (table) {
-        const thead = table.querySelector("thead");
-        if (thead) {
-          thead.innerHTML = `<tr><th>CONVIDADO</th><th>CÓDIGO</th><th>STATUS</th><th>CRIADO EM</th><th>UTILIZADO EM</th></tr>`;
-        }
-      }
-
-      if (!data || data.length === 0) {
-        elements.ticketsTableBody.innerHTML = `<tr><td colspan="5" class="muted">Nenhum ingresso cadastrado.</td></tr>`;
-        return;
-      }
-
-      const rows = data.map(t => {
-        const createdStr = t.created_at ? new Date(t.created_at).toLocaleString("pt-BR") : "-";
-        const usedStr = t.used_at ? new Date(t.used_at).toLocaleString("pt-BR") : "-";
-        return `
-          <tr>
-            <td><strong>${t.guest_name || "-"}</strong></td>
-            <td><code style="background: #111; padding: 4px 8px; border-radius: 4px; color: #00ffcc; font-weight: bold; letter-spacing: 1px;">${t.access_code || "-"}</code></td>
-            <td><span class="status-pill">${t.ticket_status}</span></td>
-            <td><small>${createdStr}</small></td>
-            <td><small>${usedStr}</small></td>
-          </tr>
-        `;
-      }).join("");
-
-      elements.ticketsTableBody.innerHTML = rows;
-    } catch (err) {
-      console.error("Erro ao listar ingressos:", err);
-      elements.ticketsTableBody.innerHTML = `<tr><td colspan="5" style="color: #ff3366;">Erro ao carregar dados.</td></tr>`;
-    }
-  }
-
-  // 8. LEITOR DE QR CODE COM CÂMERA (html5-qrcode)
-  async function startCameraScanner() {
-    if (typeof Html5Qrcode === "undefined") {
-      if (elements.scanResult) elements.scanResult.textContent = "BIBLIOTECA DE CÂMERA NÃO CARREGADA";
-      return;
-    }
-
-    try {
-      if (!html5QrcodeScanner) {
-        html5QrcodeScanner = new Html5Qrcode("reader");
-      }
-
-      await html5QrcodeScanner.start(
-        { facingMode: "environment" },
-        { fps: 10, qrbox: { width: 220, height: 220 } },
-        async (decodedText) => {
-          await processScannedQrData(decodedText);
-        },
-        () => {} // Ignora falhas por frame sem QR Code
-      );
-
-      elements.startScannerButton.disabled = true;
-      elements.stopScannerButton.disabled = false;
-      if (elements.scanResult) elements.scanResult.textContent = "CÂMERA ATIVA // APONTE PARA O QR CODE";
-    } catch (err) {
-      if (elements.scanResult) elements.scanResult.textContent = `ERRO AO ACESSAR CÂMERA: ${err.message || err}`;
-    }
-  }
-
-  async function stopCameraScanner() {
-    if (html5QrcodeScanner && html5QrcodeScanner.isScanning) {
-      try {
-        await html5QrcodeScanner.stop();
-        elements.startScannerButton.disabled = false;
-        elements.stopScannerButton.disabled = true;
-        if (elements.scanResult) elements.scanResult.textContent = "LEITOR DESATIVADO";
-      } catch (err) {
-        console.error("Erro ao parar leitor:", err);
-      }
-    }
-  }
-
-  async function processScannedQrData(qrData) {
-    try {
-      const parsed = JSON.parse(qrData);
-      if (!parsed.ticket_id || !parsed.qr_token) {
-        if (elements.scanResult) elements.scanResult.innerHTML = `<span style="color: #ff3366;">❌ DADOS DO QR CODE INVÁLIDOS</span>`;
-        return;
-      }
-
-      const { data, error } = await supabase.rpc("redeem_ticket", {
-        p_ticket_id: parsed.ticket_id,
-        p_qr_token: parsed.qr_token
-      });
-
-      if (error) throw error;
-
-      const res = data && data[0] ? data[0] : { result: "INVALID", guest_name: "" };
-
-      if (res.result === "AUTHORIZED") {
-        if (elements.scanResult) elements.scanResult.innerHTML = `<span style="color: #00ffcc; font-weight: bold;">✅ ENTRADA AUTORIZADA!<br>CONVIDADO: ${res.guest_name}</span>`;
-      } else if (res.result === "ALREADY_USED") {
-        if (elements.scanResult) elements.scanResult.innerHTML = `<span style="color: #ffcc00; font-weight: bold;">⚠️ INGRESSO JÁ UTILIZADO!<br>CONVIDADO: ${res.guest_name}</span>`;
-      } else {
-        if (elements.scanResult) elements.scanResult.innerHTML = `<span style="color: #ff3366; font-weight: bold;">❌ INGRESSO INVÁLIDO</span>`;
-      }
-
-      await loadAdminTicketList();
-    } catch (err) {
-      if (elements.scanResult) elements.scanResult.innerHTML = `<span style="color: #ff3366;">❌ ERRO NA LEITURA: ${err.message || err}</span>`;
-    }
-  }
-
-  // 9. MENSAGENS E HELPERS
-  function showAuthMessage(msg) {
-    if (elements.authMessage) {
-      elements.authMessage.textContent = msg;
-      elements.authMessage.style.color = "#ff3366";
-    }
-  }
-
-  function clearAuthMessage() {
-    if (elements.authMessage) {
-      elements.authMessage.textContent = "";
-    }
-  }
-})();
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <script src="./config.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
