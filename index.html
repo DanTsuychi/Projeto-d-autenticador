@@ -7,7 +7,6 @@
   <meta name="description" content="Autenticação de ingressos e acesso ao evento.">
   <title>Autenticador de Acesso</title>
   
-  <!-- LOGO NA RAIZ DO REPOSITÓRIO -->
   <link rel="icon" type="image/png" href="./logo.png">
   <link rel="manifest" href="./manifest.json">
   <link rel="stylesheet" href="./styles.css">
@@ -17,7 +16,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <!-- ELEMENTOS DE ILUMINAÇÃO NEON VERMELHA COM FALHAS -->
   <div class="ambient ambient-one faulty-neon"></div>
   <div class="ambient ambient-two faulty-neon-slow"></div>
   <div class="scanlines"></div>
@@ -45,7 +43,6 @@
           <span class="live-dot">ONLINE</span>
         </div>
 
-        <!-- LOGO CENTRALIZADA NA RAIZ COM GLITCH -->
         <div class="glitch-logo-container">
           <img src="./logo.png" alt="Logo do Evento" class="glitch-logo">
         </div>
@@ -90,11 +87,12 @@
           <span class="status-pill" id="guestStatus">AGUARDANDO</span>
         </div>
 
+        <!-- CARD INICIAL: COMPRA PIX OU DIGITAR CÓDIGO -->
         <div id="noTicketCard" class="panel claim-panel">
           <div class="claim-symbol">⚡</div>
           <div class="claim-copy">
             <h3>GARANTA SEU INGRESSO</h3>
-            <p class="muted">Compre via Pix por R$ 30,00 e solicite seu códigopara resgatar aqui no site.</p>
+            <p class="muted">Compre via Pix por R$ 30,00 e solicite seu código para resgatar aqui no site.</p>
           </div>
 
           <button id="buyPixBtn" class="button primary full buy-pix-btn" type="button">
@@ -105,27 +103,32 @@
 
           <form id="claimForm" class="claim-form">
             <label for="ticketCode">CÓDIGO DE ACESSO</label>
-            <input id="ticketCode" inputmode="numeric" autocomplete="one-time-code" maxlength="9" pattern="[0-9]{9}" placeholder="000 000 000">
+            <input id="ticketCode" inputmode="numeric" autocomplete="one-time-code" maxlength="9" pattern="[0-9]{9}" placeholder="000 000 000" required>
             <button class="button ghost full" type="submit">RESGATAR COM CÓDIGO ↗</button>
           </form>
         </div>
 
-        <!-- MODAL / CARD PIX -->
+        <!-- CARD PIX / SOLICITAR CÓDIGO (EXIBIDO APÓS CLICAR NO BOTÃO PIX) -->
         <div id="pixPaymentCard" class="panel pix-card hidden">
           <div class="panel-heading">
-            <span class="panel-kicker">PAGAMENTO PIX</span>
-            <span class="live-dot warning-dot">AGUARDANDO</span>
+            <span class="panel-kicker">CHAVE PIX COPIADA</span>
+            <span class="live-dot warning-dot">PAGAMENTO</span>
           </div>
-          <h3>PAGUE COM O QR CODE ABAIXO</h3>
-          <p class="muted">Abra o app do seu banco e escaneie ou copie o código Pix.</p>
+          <h3>CHAVE PIX: 98984650323</h3>
+          <p class="muted" style="margin-bottom: 1rem;">
+            A chave Pix foi copiada para a sua área de transferência. Faça o pagamento de <b>R$ 30,00</b> no aplicativo do seu banco e em seguida clique abaixo para enviar o comprovante no WhatsApp.
+          </p>
 
-          <img id="pixQrImg" class="pix-qr-img" src="" alt="QR Code Pix">
+          <a id="whatsappBtn" href="https://wa.me/5598984650323?text=Oi,%20gostaria%20de%20solicitar%20o%20meu%20c%C3%B3digo%20de%20entrada%20da%20festa!" target="_blank" rel="noopener noreferrer" class="button primary full buy-pix-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px;">
+            SOLICITAR O CÓDIGO (WHATSAPP) 📲
+          </a>
 
-          <input id="pixCopyPasteInput" class="pix-copy-input" readonly type="text" value="">
-          <button id="copyPixBtn" class="button primary full" type="button">COPIAR CÓDIGO PIX 📋</button>
+          <button id="hasCodeBtn" class="button ghost full" type="button" style="margin-top: 0.8rem;">
+            JÁ TENHO O CÓDIGO ↗
+          </button>
 
           <p class="fine-print pix-notice">
-            ⏳ O sistema identificará o pagamento automaticamente e liberará seu ingresso nesta tela.
+            💡 Após receber o código de 9 dígitos no WhatsApp, clique em "JÁ TENHO O CÓDIGO" para gerar seu QR Code.
           </p>
         </div>
 
