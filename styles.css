@@ -1,55 +1,399 @@
-@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
-:root{color-scheme:dark;--bg:#050505;--panel:#0d0b0d;--panel2:#130a0d;--red:#ff1744;--red2:#b20c2e;--text:#f6f2f3;--muted:#a79ba0;--line:#3b111d;--green:#61ffc1;--font:'Rajdhani',sans-serif;--display:'Orbitron',sans-serif}
-*{box-sizing:border-box}
-html{min-height:100%;background:var(--bg);scroll-behavior:smooth}
-body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 18% 22%,#250711 0,transparent 34%),radial-gradient(ellipse at 90% 70%,#18060c 0,transparent 32%),#050505;color:var(--text);font-family:var(--font);font-size:17px;overflow-x:hidden}
-button,input{font:inherit}
-button{cursor:pointer}
-.hidden{display:none!important}
-.ambient{position:fixed;width:360px;height:360px;border-radius:50%;filter:blur(110px);opacity:.15;pointer-events:none;z-index:0}
-.ambient-one{background:#ff003c;top:10%;left:-240px}.ambient-two{background:#a90035;bottom:0;right:-260px}
-.scanlines{position:fixed;inset:0;pointer-events:none;z-index:1;opacity:.045;background:repeating-linear-gradient(to bottom,transparent 0 3px,#fff 4px,transparent 5px)}
-.topbar,.shell,.footer{position:relative;z-index:2}
-.topbar{height:82px;max-width:1240px;padding:0 28px;margin:auto;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #31111a}
-.brand{display:flex;align-items:center;gap:14px;text-decoration:none;color:var(--text)}
-.brand-logo{width:auto;max-width:150px;height:50px;object-fit:contain;filter:drop-shadow(0 0 9px #ff174466)}
-.brand-fallback{font:700 16px var(--display);letter-spacing:2px}.brand-fallback b{color:var(--red);text-shadow:0 0 14px #ff1744}
-.system-status,.microcopy,.eyebrow,.panel-kicker,.live-dot,.status-pill,.ticket-stamp,.qr-frame>span,.footer,.fine-print,.ticket-id{font-family:'Share Tech Mono',monospace;letter-spacing:1.2px}
-.system-status{font-size:11px;color:#c2b4b9;display:flex;align-items:center;gap:9px}.system-status i,.live-dot:before{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--red);box-shadow:0 0 10px var(--red);content:""}
-.shell{max-width:1160px;margin:0 auto;padding:64px 28px 90px;min-height:calc(100vh - 140px)}
-.auth-layout{display:grid;grid-template-columns:1.05fr .75fr;align-items:center;gap:clamp(40px,8vw,120px);min-height:530px}
-.eyebrow{color:var(--red);font-size:11px;margin:0 0 14px}
-h1,h2,h3{font-family:var(--display);line-height:1.2;margin:0;letter-spacing:.02em}
-.hero-copy h1{font-size:clamp(38px,5vw,66px);font-weight:800;line-height:1.12;text-shadow:0 0 24px #ff17441a}
-.hero-copy h1 span{color:var(--red);text-shadow:0 0 24px #ff174455}
-.hero-description{max-width:430px;color:#b8aeb2;font-size:20px;line-height:1.5;margin:24px 0 32px}
-.hero-lines{display:flex;gap:7px;align-items:center;margin:30px 0 18px}.hero-lines span{display:block;height:3px;width:35px;background:#4b1423}.hero-lines span:first-child{width:90px;background:var(--red);box-shadow:0 0 14px #ff1744}
-.microcopy{font-size:10px;color:#786c71}
-.panel{background:linear-gradient(145deg,#100d0fef,#080708f5);border:1px solid #4a1423;border-radius:4px;padding:27px;box-shadow:0 0 0 1px #ff17440a,0 15px 50px #0008;position:relative}
-.panel:before{content:"";position:absolute;left:-1px;top:-1px;width:44px;height:2px;background:var(--red);box-shadow:0 0 14px var(--red)}
-.auth-panel{padding:30px;box-shadow:0 0 35px #ff17440c,0 18px 55px #0008}
-.panel-heading,.ticket-top,.dashboard-header,.section-heading{display:flex;align-items:center;justify-content:space-between;gap:15px}
-.panel-kicker{font-size:11px;color:#d5c6cb}.live-dot{font-size:10px;color:var(--green);display:flex;gap:7px;align-items:center}.live-dot:before{background:var(--green);box-shadow:0 0 10px var(--green)}
-.tabs{display:grid;grid-template-columns:1fr 1fr;margin:28px 0 25px;border-bottom:1px solid #40202a}
-.tab{background:transparent;border:0;border-bottom:2px solid transparent;color:#8e8186;padding:12px 5px;font:600 11px var(--display);letter-spacing:1px}.tab.active{color:var(--red);border-color:var(--red);text-shadow:0 0 10px #ff174466}
-label{display:block;font:10px 'Share Tech Mono',monospace;letter-spacing:1px;color:#d4c5ca;margin:17px 0 8px}
-input{display:block;width:100%;border:1px solid #39232a;background:#070607;color:#fff;border-radius:2px;padding:13px 14px;outline:none;transition:border .2s,box-shadow .2s}
-input:focus{border-color:var(--red);box-shadow:0 0 0 2px #ff17441c,0 0 17px #ff174410}
-input::placeholder{color:#63565b}
-.button{border:1px solid var(--red);border-radius:2px;padding:12px 16px;color:#fff;background:#310a16;font:600 11px var(--display);letter-spacing:.8px;transition:background .2s,box-shadow .2s,transform .2s}
-.button:hover:not(:disabled){background:#651025;box-shadow:0 0 18px #ff17443b}.button:active:not(:disabled){transform:translateY(1px)}.button:disabled{opacity:.4;cursor:not-allowed}
-.button.primary{background:var(--red);color:#100307;border-color:#ff506e;box-shadow:0 0 18px #ff174426;font-weight:800}.button.primary:hover:not(:disabled){background:#ff496a;box-shadow:0 0 24px #ff174466}
-.button.full{width:100%;margin-top:22px;display:flex;justify-content:space-between;align-items:center}.button.ghost{background:transparent;border-color:#5b2635;color:#d9cbd0}.button.small{padding:8px 10px;font-size:10px}
-.message{font-size:14px;line-height:1.45;color:#ff8399;min-height:18px;margin:14px 0 0}.message.success{color:var(--green)}
-.fine-print{font-size:9px;line-height:1.7;color:#82767b;margin:20px 0 0}
-.footer{max-width:1160px;margin:auto;padding:18px 28px 28px;border-top:1px solid #281018;display:flex;justify-content:space-between;color:#71666b;font-size:9px}.footer b{color:var(--red)}
-.dashboard-header{align-items:flex-start;margin-bottom:50px}.dashboard-header h1{font-size:clamp(28px,4vw,44px)}.muted{color:var(--muted);line-height:1.45}.dashboard-header .muted{margin:10px 0 0}
-.section-heading{margin:0 0 20px}.section-heading h2{font-size:clamp(21px,3vw,30px)}.status-pill{font-size:10px;color:var(--red);border:1px solid #692238;padding:8px 10px}.admin-pill{color:var(--green);border-color:#236b52}
-.claim-panel{display:grid;grid-template-columns:auto 1fr minmax(240px,.9fr);align-items:center;gap:24px;padding:30px}.claim-symbol{width:58px;height:58px;display:grid;place-items:center;border:1px solid var(--red);color:var(--red);font-size:34px;box-shadow:inset 0 0 18px #ff174415,0 0 18px #ff174415}.claim-copy h3,.panel h3{font-size:16px}.claim-copy p,.panel>p{font-size:15px;margin:10px 0 0}.claim-form label{margin-top:0}.claim-form .button{margin-top:12px}
-.ticket-card{margin-top:22px}.ticket-top{padding-bottom:20px;border-bottom:1px dashed #642238}.ticket-stamp{font-size:9px;color:var(--red);border:1px solid #672139;padding:7px}.ticket-main{display:flex;justify-content:space-between;align-items:center;gap:30px;padding:28px 0}.ticket-details h2{font-size:clamp(22px,4vw,36px);overflow-wrap:anywhere}.ticket-details .muted{max-width:340px}.ticket-id{font-size:10px;color:#76676d;overflow-wrap:anywhere}.qr-frame{background:#fff;padding:13px 13px 8px;min-width:164px;text-align:center;color:#111;box-shadow:0 0 24px #ff17441a}.qr-frame canvas,.qr-frame img{max-width:100%;height:auto!important}.qr-frame>span{display:block;font-size:8px;margin-top:8px;color:#444}.used-notice{margin-top:15px;color:#ff7d94;font:11px 'Share Tech Mono',monospace}
-.admin-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}.admin-grid .panel h3{margin-top:22px}.admin-grid .panel form{margin-top:20px}.admin-grid .panel form .button{margin-top:22px}.code-result{margin-top:22px;padding:16px;border:1px dashed #6b2438;background:#16080d}.code-result strong{display:block;font:700 25px var(--display);letter-spacing:3px;color:var(--red);margin:8px 0 14px;overflow-wrap:anywhere}.code-result .button{margin-top:0}
-.reader{min-height:150px;margin-top:20px;border:1px dashed #572033;background:#080607;overflow:hidden}.reader video{max-width:100%}.scanner-actions{display:flex;gap:10px;margin-top:15px}.scan-result{margin-top:14px;border:1px solid #3c2630;background:#090709;padding:13px;font:11px 'Share Tech Mono',monospace;color:#9c8e94;min-height:42px;overflow-wrap:anywhere}.scan-result.success{border-color:#216d52;color:var(--green)}.scan-result.error{border-color:#8a1934;color:#ff758f}
-.table-panel{margin-top:20px}.table-wrap{overflow-x:auto;margin-top:20px}table{width:100%;border-collapse:collapse;text-align:left;min-width:540px}th,td{padding:13px 12px;border-bottom:1px solid #2e1b22;font-size:13px}th{font:10px 'Share Tech Mono',monospace;color:#a999a0;letter-spacing:.7px}td{color:#ddd0d5}.table-status{font:10px 'Share Tech Mono',monospace}.table-status.used{color:#ff8197}.table-status.issued{color:var(--green)}.table-status.available{color:#d8c5a2}
-@media(max-width:820px){.shell{padding:42px 20px 65px}.auth-layout{grid-template-columns:1fr;gap:35px;max-width:560px;margin:auto}.hero-copy h1{font-size:clamp(38px,9vw,58px)}.hero-description{margin:18px 0}.hero-lines{margin:20px 0 12px}.admin-grid{grid-template-columns:1fr}.claim-panel{grid-template-columns:auto 1fr}.claim-form{grid-column:1/-1}.dashboard-header{margin-bottom:36px}}
-@media(max-width:480px){.topbar{height:68px;padding:0 18px}.brand-logo{max-width:105px;height:40px}.system-status{font-size:8px;letter-spacing:.5px}.shell{padding:32px 15px 50px}.auth-panel,.panel{padding:21px}.auth-panel{padding:22px}.hero-copy h1{font-size:39px}.hero-description{font-size:18px}.claim-panel{grid-template-columns:1fr;gap:16px}.claim-symbol{width:45px;height:45px;font-size:26px}.ticket-main{flex-direction:column;align-items:flex-start}.qr-frame{align-self:center}.ticket-top{align-items:flex-start;flex-direction:column}.footer{padding:17px 15px;gap:12px;font-size:8px}.dashboard-header{gap:12px}.dashboard-header .button{padding:10px}.status-pill{font-size:8px}.section-heading{align-items:flex-start}}
-@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+/* ========================================================
+   ESTILOS PROJETO D — FUNDO PRETO & NEON VERMELHO FALHADO
+   ======================================================== */
+
+:root {
+  --bg-color: #020202;
+  --panel-bg: rgba(12, 12, 12, 0.85);
+  --panel-border: rgba(255, 20, 60, 0.25);
+  --neon-red: #ff143c;
+  --neon-red-glow: rgba(255, 20, 60, 0.6);
+  --neon-cyan: #00ffcc;
+  --text-main: #f0f0f0;
+  --text-muted: #888888;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  font-family: 'Rajdhani', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* --------------------------------------------------------
+   ILUMINAÇÃO AMBIENTE NEON VERMELHA COM FALHAS (FLICKER)
+   -------------------------------------------------------- */
+.ambient {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(120px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.ambient-one {
+  top: -15%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 650px;
+  height: 650px;
+  background: radial-gradient(circle, rgba(255, 0, 55, 0.35) 0%, rgba(150, 0, 30, 0.08) 65%, transparent 85%);
+}
+
+.ambient-two {
+  bottom: -15%;
+  right: -10%;
+  width: 550px;
+  height: 550px;
+  background: radial-gradient(circle, rgba(220, 0, 45, 0.28) 0%, transparent 75%);
+}
+
+/* Animação de Neons com Falha */
+.faulty-neon {
+  animation: redFlicker 3.5s infinite linear;
+}
+
+.faulty-neon-slow {
+  animation: redFlickerSlow 5.2s infinite linear;
+}
+
+@keyframes redFlicker {
+  0%, 100% { opacity: 0.8; filter: blur(120px); }
+  18% { opacity: 0.8; }
+  19% { opacity: 0.1; filter: blur(90px); }
+  20% { opacity: 0.9; }
+  21% { opacity: 0.2; }
+  22% { opacity: 0.85; }
+  52% { opacity: 0.85; }
+  53% { opacity: 0.05; }
+  54% { opacity: 0.7; }
+  75% { opacity: 0.8; }
+  76% { opacity: 0.25; }
+  77% { opacity: 0.8; }
+}
+
+@keyframes redFlickerSlow {
+  0%, 100% { opacity: 0.6; }
+  32% { opacity: 0.6; }
+  33% { opacity: 0.15; }
+  34% { opacity: 0.7; }
+  35% { opacity: 0.1; }
+  36% { opacity: 0.65; }
+  88% { opacity: 0.65; }
+  89% { opacity: 0.05; }
+  90% { opacity: 0.6; }
+}
+
+.scanlines {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  pointer-events: none;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.4) 50%);
+  background-size: 100% 4px;
+  z-index: 1;
+  opacity: 0.6;
+}
+
+/* --------------------------------------------------------
+   LAYOUT E PAINÉIS
+   -------------------------------------------------------- */
+.shell {
+  position: relative;
+  z-index: 2;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.topbar {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  border-bottom: 1px solid var(--panel-border);
+  background: rgba(5, 5, 5, 0.8);
+  backdrop-filter: blur(10px);
+}
+
+.brand-logo {
+  height: 40px;
+  width: auto;
+  filter: drop-shadow(0 0 6px var(--neon-red));
+}
+
+.system-status {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.75rem;
+  color: var(--neon-red);
+  letter-spacing: 1px;
+}
+
+.system-status i {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background: var(--neon-red);
+  border-radius: 50%;
+  box-shadow: 0 0 8px var(--neon-red);
+  margin-right: 6px;
+  animation: redFlicker 2s infinite;
+}
+
+.panel {
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 12px;
+  padding: 1.8rem;
+  backdrop-filter: blur(16px);
+  box-shadow: 0 0 25px rgba(0, 0, 0, 0.8), inset 0 0 15px rgba(255, 20, 60, 0.05);
+  margin-bottom: 1.5rem;
+}
+
+/* --------------------------------------------------------
+   EFEITO GLITCH NA LOGO CENTRAL
+   -------------------------------------------------------- */
+.glitch-logo-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 1rem 0 1.5rem 0;
+  width: 100%;
+}
+
+.glitch-logo {
+  width: 190px;
+  max-width: 75%;
+  height: auto;
+  display: block;
+  position: relative;
+  filter: drop-shadow(0 0 12px var(--neon-red-glow));
+  animation: logoGlitch 3.2s infinite ease-in-out;
+}
+
+@keyframes logoGlitch {
+  0%, 100% {
+    transform: translate(0);
+    filter: drop-shadow(0 0 12px var(--neon-red-glow));
+  }
+  2% {
+    transform: translate(-3px, 2px);
+    filter: drop-shadow(-3px 0 var(--neon-red)) drop-shadow(3px 0 var(--neon-cyan));
+  }
+  4% {
+    transform: translate(3px, -2px);
+    filter: drop-shadow(3px -2px var(--neon-cyan));
+  }
+  6% {
+    transform: translate(0);
+    filter: drop-shadow(0 0 12px var(--neon-red-glow));
+  }
+  50% {
+    transform: translate(-2px, -1px);
+    filter: drop-shadow(-2px 1px var(--neon-red));
+  }
+  52% {
+    transform: translate(2px, 1px);
+    filter: drop-shadow(2px -1px var(--neon-cyan));
+  }
+  54% {
+    transform: translate(0);
+    filter: drop-shadow(0 0 12px var(--neon-red-glow));
+  }
+}
+
+/* --------------------------------------------------------
+   FORMULÁRIOS, BOTÕES E ABAS
+   -------------------------------------------------------- */
+.tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid #222;
+}
+
+.tab {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  padding: 10px;
+  font-family: 'Orbitron', sans-serif;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.3s;
+}
+
+.tab.active {
+  color: var(--neon-cyan);
+  border-bottom-color: var(--neon-cyan);
+  text-shadow: 0 0 8px rgba(0, 255, 204, 0.5);
+}
+
+label {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 1rem;
+  margin-bottom: 0.3rem;
+  letter-spacing: 1px;
+}
+
+input {
+  width: 100%;
+  background: #080808;
+  border: 1px solid #2a2a2a;
+  color: #fff;
+  padding: 12px;
+  border-radius: 6px;
+  outline: none;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 1rem;
+  transition: border-color 0.3s;
+}
+
+input:focus {
+  border-color: var(--neon-cyan);
+  box-shadow: 0 0 8px rgba(0, 255, 204, 0.2);
+}
+
+.button {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  padding: 12px 20px;
+  border-radius: 6px;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  border: none;
+  margin-top: 1rem;
+}
+
+.button.primary {
+  background: var(--neon-cyan);
+  color: #000;
+  box-shadow: 0 0 12px rgba(0, 255, 204, 0.3);
+}
+
+.button.primary:hover {
+  background: #00cca3;
+  box-shadow: 0 0 18px rgba(0, 255, 204, 0.5);
+}
+
+.button.ghost {
+  background: transparent;
+  border: 1px solid #333;
+  color: #ccc;
+}
+
+.button.ghost:hover {
+  border-color: #555;
+  color: #fff;
+}
+
+.button.full {
+  width: 100%;
+}
+
+.buy-pix-btn {
+  background: var(--neon-cyan) !important;
+  color: #000 !important;
+  font-weight: bold;
+}
+
+/* --------------------------------------------------------
+   CARD E MODAL PIX
+   -------------------------------------------------------- */
+.pix-card {
+  text-align: center;
+  border-color: var(--neon-cyan);
+  box-shadow: 0 0 20px rgba(0, 255, 204, 0.2);
+}
+
+.pix-qr-img {
+  width: 200px;
+  height: 200px;
+  margin: 1.2rem auto;
+  display: block;
+  border: 2px solid var(--neon-cyan);
+  border-radius: 8px;
+  background: #fff;
+  padding: 6px;
+}
+
+.pix-copy-input {
+  background: #080808;
+  color: var(--neon-cyan);
+  border: 1px solid #333;
+  text-align: center;
+  font-size: 0.85rem;
+  margin-bottom: 0.5rem;
+}
+
+.divider-text {
+  margin: 1.5rem 0;
+  color: #555;
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+.pix-notice {
+  margin-top: 1rem;
+  color: var(--neon-cyan);
+}
+
+.warning-dot {
+  background: #ffcc00 !important;
+  box-shadow: 0 0 8px #ffcc00 !important;
+}
+
+/* --------------------------------------------------------
+   TABELA DO ADMINISTRADOR E TICKET DIGITAL
+   -------------------------------------------------------- */
+.table-wrap {
+  overflow-x: auto;
+  margin-top: 1rem;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+th, td {
+  padding: 12px;
+  border-bottom: 1px solid #1a1a1a;
+  font-size: 0.9rem;
+}
+
+th {
+  color: var(--text-muted);
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.75rem;
+}
+
+.status-pill {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: #111;
+  border: 1px solid #333;
+  font-size: 0.75rem;
+  color: var(--neon-cyan);
+}
+
+.hidden {
+  display: none !important;
+}
