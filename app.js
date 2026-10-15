@@ -3,101 +3,177 @@
    ======================================================== */
 
 (function () {
-  // 1. DADOS DE CONFIGURAÇÃO E INICIALIZAÇÃO
+  // 1. CONFIGURAÇÃO E INICIALIZAÇÃO DO SUPABASE
   const config = window.PROJETO_D_CONFIG || {};
   if (!config.supabaseUrl || !config.supabaseKey) {
-    showGlobalError("Configure a Project URL e a chave pública em config.js antes de usar o site.");
+    showAuthMessage("Erro: configure a URL e a chave pública em config.js.");
     return;
   }
 
-  // Inicializa o cliente do Supabase
   const supabase = window.supabase.createClient(config.supabaseUrl, config.supabaseKey);
 
-  // 2. REFERÊNCIAS DO DOM
-  const elements = {
-    authSection: document.getElementById("auth-section"),
-    dashboardSection: document.getElementById("dashboard-section"),
-    loginForm: document.getElementById("login-form"),
-    signupForm: document.getElementById("signup-form"),
-    authError: document.getElementById("auth-error"),
-    tabLogin: document.getElementById("tab-login"),
-    tabSignup: document.getElementById("tab-signup"),
-    
-    // Views do Dashboard
-    guestView: document.getElementById("guest-view"),
-    adminView: document.getElementById("admin-view"),
-    userDisplayName: document.getElementById("user-display-name"),
-    logoutBtn: document.getElementById("logout-btn"),
+  let authMode = "login";
+  let html5QrcodeScanner = null;
+  let elements = {};
 
-    // Painel do Convidado
-    claimForm: document.getElementById("claim-form"),
-    claimCodeInput: document.getElementById("claim-code-input"),
-    ticketContainer: document.getElementById("ticket-container"),
-    qrCodeCanvas: document.getElementById("qrcode-canvas"),
-    ticketStatusBadge: document.getElementById("ticket-status-badge"),
-    guestNameDisplay: document.getElementById("guest-name-display"),
-
-    // Painel do Admin
-    createTicketForm: document.getElementById("create-ticket-form"),
-    guestNameInput: document.getElementById("guest-name-input"),
-    createdCodeDisplay: document.getElementById("created-code-display"),
-    adminTicketsTable: document.getElementById("admin-tickets-table"),
-    manualRedeemForm: document.getElementById("manual-redeem-form"),
-    redeemInput: document.getElementById("redeem-input"),
-    redeemResult: document.getElementById("redeem-result")
-  };
-
-  // 3. LISTENERS E INICIALIZAÇÃO
-  document.addEventListener("DOMContentLoaded", initApp);
+  // 2. INICIALIZAÇÃO SEGURA DA APLICAÇÃO
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initApp);
+  } else {
+    initApp();
+  }
 
   async function initApp() {
+    bindElements();
     setupEventListeners();
-    checkSession();
+    await checkSession();
+  }
+
+  function bindElements() {
+    elements = {
+      // Seções
+      authView: document.getElementById("authView"),
+      appView: document.getElementById("appView"),
+
+      // Formulário de Autenticação
+      loginTab: document.getElementById("loginTab"),
+      signupTab: document.getElementById("signupTab"),
+      authForm: document.getElementById("authForm"),
+      displayName: document.getElementById("displayName"),
+      displayNameLabel: document.getElementById("displayNameLabel"),
+      email: document.getElementById("email"),
+      password: document.getElementById("password"),
+      authSubmit: document.getElementById("authSubmit"),
+      authMessage: document.getElementById("authMessage"),
+
+      // Header do Dashboard
+      welcomeTitle: document.getElementById("welcomeTitle"),
+      roleCaption: document.getElementById("roleCaption"),
+      logoutButton: document.getElementById("logoutButton"),
+
+      // Painel Convidado
+      guestPanel: document.getElementById("guestPanel"),
+      guestStatus: document.getElementById("guestStatus"),
+      noTicketCard: document.getElementById("noTicketCard"),
+      ticketCard: document.getElementById("ticketCard"),
+      claimForm: document.getElementById("claimForm"),
+      ticketCode: document.getElementById("ticketCode"),
+      ticketGuestName: document.getElementById("ticketGuestName"),
+      ticketIdLabel: document.getElementById("ticketIdLabel"),
+      ticketUsedNotice: document.getElementById("ticketUsedNotice"),
+      qrCode: document.getElementById("qrCode"),
+
+      // Painel Admin
+      adminPanel: document.getElementById("adminPanel"),
+      createTicketForm: document.getElementById("createTicketForm"),
+      guestName: document.getElementById("guestName"),
+      newCodeResult: document.getElementById("newCodeResult"),
+      newCode: document.getElementById("newCode"),
+      copyCodeButton: document.getElementById("copyCodeButton"),
+      startScannerButton: document.getElementById("startScannerButton"),
+      stopScannerButton: document.getElementById("stopScannerButton"),
+      scanResult: document.getElementById("scanResult"),
+      refreshTicketsButton: document.getElementById("refreshTicketsButton"),
+      ticketsTableBody: document.getElementById("ticketsTableBody"),
+      appMessage: document.getElementById("appMessage")
+    };
   }
 
   function setupEventListeners() {
-    // Alternância entre as abas Entrar / Criar Conta
-    if (elements.tabLogin && elements.tabSignup) {
-      elements.tabLogin.addEventListener("click", () => switchAuthTab("login"));
-      elements.tabSignup.addEventListener("click", () => switchAuthTab("signup"));
+    // Alternância de Abas (Entrar / Criar Conta)
+    if (elements.loginTab) {
+      elements.loginTab.addEventListener("click", (e) => {
+        e.preventDefault();
+        switchAuthTab("login");
+      });
+    }
+    if (elements.signupTab) {
+      elements.signupTab.addEventListener("click", (e) => {
+        e.preventDefault();
+        switchAuthTab("signup");
+      });
     }
 
-    // Formulários de Autenticação
-    if (elements.loginForm) elements.loginForm.addEventListener("submit", handleLogin);
-    if (elements.signupForm) elements.signupForm.addEventListener("submit", handleSignup);
-    if (elements.logoutBtn) elements.logoutBtn.addEventListener("click", handleLogout);
+    // Submissão de Autenticação
+    if (elements.authForm) elements.authForm.addEventListener("submit", handleAuthSubmit);
+    if (elements.logoutButton) elements.logoutButton.addEventListener("click", handleLogout);
 
-    // Ações do Convidado
+    // Convidado
     if (elements.claimForm) elements.claimForm.addEventListener("submit", handleClaimTicket);
 
-    // Ações do Administrador
+    // Admin
     if (elements.createTicketForm) elements.createTicketForm.addEventListener("submit", handleCreateTicket);
-    if (elements.manualRedeemForm) elements.manualRedeemForm.addEventListener("submit", handleManualRedeem);
+    if (elements.copyCodeButton) elements.copyCodeButton.addEventListener("click", handleCopyCode);
+    if (elements.refreshTicketsButton) elements.refreshTicketsButton.addEventListener("click", loadAdminTicketList);
 
-    // Escuta alterações de sessão no Supabase
+    // Câmera / Leitor QR Code
+    if (elements.startScannerButton) elements.startScannerButton.addEventListener("click", startCameraScanner);
+    if (elements.stopScannerButton) elements.stopScannerButton.addEventListener("click", stopCameraScanner);
+
+    // Escuta mudanças de sessão do Supabase
     supabase.auth.onAuthStateChange((event, session) => {
       if (session) {
         loadUserProfile();
       } else {
-        showAuthSection();
+        showAuthView();
       }
     });
   }
 
-  // 4. NAVEGAÇÃO E AUTENTICAÇÃO
-  function switchAuthTab(tab) {
-    if (tab === "login") {
-      if (elements.tabLogin) elements.tabLogin.classList.add("active");
-      if (elements.tabSignup) elements.tabSignup.classList.remove("active");
-      if (elements.loginForm) elements.loginForm.style.display = "block";
-      if (elements.signupForm) elements.signupForm.style.display = "none";
+  // 3. LÓGICA DAS ABAS DE AUTENTICAÇÃO
+  function switchAuthTab(mode) {
+    authMode = mode;
+    clearAuthMessage();
+
+    if (mode === "login") {
+      if (elements.loginTab) elements.loginTab.classList.add("active");
+      if (elements.signupTab) elements.signupTab.classList.remove("active");
+      if (elements.displayName) elements.displayName.classList.add("hidden");
+      if (elements.displayNameLabel) elements.displayNameLabel.classList.add("hidden");
+      if (elements.displayName) elements.displayName.required = false;
+      if (elements.authSubmit) elements.authSubmit.innerHTML = 'ENTRAR NO SISTEMA <span>↗</span>';
     } else {
-      if (elements.tabSignup) elements.tabSignup.classList.add("active");
-      if (elements.tabLogin) elements.tabLogin.classList.remove("active");
-      if (elements.loginForm) elements.loginForm.style.display = "none";
-      if (elements.signupForm) elements.signupForm.style.display = "block";
+      if (elements.signupTab) elements.signupTab.classList.add("active");
+      if (elements.loginTab) elements.loginTab.classList.remove("active");
+      if (elements.displayName) elements.displayName.classList.remove("hidden");
+      if (elements.displayNameLabel) elements.displayNameLabel.classList.remove("hidden");
+      if (elements.displayName) elements.displayName.required = true;
+      if (elements.authSubmit) elements.authSubmit.innerHTML = 'CRIAR CONTA <span>↗</span>';
     }
-    clearAuthError();
+  }
+
+  async function handleAuthSubmit(e) {
+    e.preventDefault();
+    clearAuthMessage();
+
+    const emailVal = elements.email ? elements.email.value.trim() : "";
+    const passVal = elements.password ? elements.password.value : "";
+    const nameVal = elements.displayName ? elements.displayName.value.trim() : "";
+
+    if (elements.authSubmit) elements.authSubmit.disabled = true;
+
+    try {
+      if (authMode === "login") {
+        const { error } = await supabase.auth.signInWithPassword({
+          email: emailVal,
+          password: passVal
+        });
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.auth.signUp({
+          email: emailVal,
+          password: passVal,
+          options: {
+            data: { display_name: nameVal || emailVal }
+          }
+        });
+        if (error) throw error;
+      }
+    } catch (err) {
+      showAuthMessage(err.message || "Erro na autenticação.");
+    } finally {
+      if (elements.authSubmit) elements.authSubmit.disabled = false;
+    }
   }
 
   async function checkSession() {
@@ -105,277 +181,284 @@
     if (session) {
       await loadUserProfile();
     } else {
-      showAuthSection();
-    }
-  }
-
-  async function handleLogin(e) {
-    e.preventDefault();
-    clearAuthError();
-    const email = e.target.email.value.trim();
-    const password = e.target.password.value;
-
-    try {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) throw error;
-    } catch (err) {
-      showAuthError(err.message || "Erro ao realizar login.");
-    }
-  }
-
-  async function handleSignup(e) {
-    e.preventDefault();
-    clearAuthError();
-    const name = e.target.name ? e.target.name.value.trim() : "";
-    const email = e.target.email.value.trim();
-    const password = e.target.password.value;
-
-    try {
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: { display_name: name || email }
-        }
-      });
-      if (error) throw error;
-    } catch (err) {
-      showAuthError(err.message || "Erro ao criar conta.");
+      showAuthView();
     }
   }
 
   async function handleLogout() {
+    await stopCameraScanner();
     await supabase.auth.signOut();
-    showAuthSection();
+    showAuthView();
   }
 
-  // 5. CARREGAMENTO DO PERFIL
+  // 4. NAVEGAÇÃO ENTRE TELAS
+  function showAuthView() {
+    if (elements.authView) elements.authView.classList.remove("hidden");
+    if (elements.appView) elements.appView.classList.add("hidden");
+  }
+
+  function showAppView() {
+    if (elements.authView) elements.authView.classList.add("hidden");
+    if (elements.appView) elements.appView.classList.remove("hidden");
+  }
+
   async function loadUserProfile() {
     try {
+      showAppView();
       const { data, error } = await supabase.rpc("my_profile");
       if (error) throw error;
 
-      const profile = data && data[0] ? data[0] : { display_name: "Usuário", user_role: "guest" };
-      
-      if (elements.userDisplayName) {
-        elements.userDisplayName.textContent = profile.display_name || "Usuário";
+      const profile = data && data[0] ? data[0] : { display_name: "Convidado", user_role: "guest" };
+
+      if (elements.welcomeTitle) {
+        elements.welcomeTitle.textContent = `BEM-VINDO, ${profile.display_name.toUpperCase()}.`;
+      }
+      if (elements.roleCaption) {
+        elements.roleCaption.textContent = `Acesso autenticado // Nível: ${profile.user_role.toUpperCase()}`;
       }
 
-      showDashboardSection();
-
       if (profile.user_role === "admin") {
-        showAdminPanel();
+        if (elements.adminPanel) elements.adminPanel.classList.remove("hidden");
+        if (elements.guestPanel) elements.guestPanel.classList.add("hidden");
+        await loadAdminTicketList();
       } else {
-        showGuestPanel();
+        if (elements.guestPanel) elements.guestPanel.classList.remove("hidden");
+        if (elements.adminPanel) elements.adminPanel.classList.add("hidden");
+        await loadMyTicket();
       }
     } catch (err) {
       console.error("Erro ao carregar perfil:", err);
-      showGuestPanel();
+      if (elements.guestPanel) elements.guestPanel.classList.remove("hidden");
+      if (elements.adminPanel) elements.adminPanel.classList.add("hidden");
     }
   }
 
-  // 6. PAINEL DO CONVIDADO (GUEST)
-  async function showGuestPanel() {
-    if (elements.guestView) elements.guestView.style.display = "block";
-    if (elements.adminView) elements.adminView.style.display = "none";
-    await loadMyTicket();
-  }
-
+  // 5. PAINEL DO CONVIDADO
   async function loadMyTicket() {
     try {
       const { data, error } = await supabase.rpc("my_ticket");
       if (error) throw error;
 
       if (data && data.length > 0) {
-        renderTicket(data[0]);
+        renderTicketCard(data[0]);
       } else {
-        renderNoTicket();
+        renderNoTicketCard();
       }
     } catch (err) {
-      console.error("Erro ao buscar ingresso:", err);
+      console.error("Erro ao carregar ingresso:", err);
     }
   }
 
-  function renderTicket(ticket) {
-    if (elements.claimForm) elements.claimForm.style.display = "none";
-    if (elements.ticketContainer) elements.ticketContainer.style.display = "block";
+  function renderTicketCard(ticket) {
+    if (elements.noTicketCard) elements.noTicketCard.classList.add("hidden");
+    if (elements.ticketCard) elements.ticketCard.classList.remove("hidden");
 
-    if (elements.guestNameDisplay) elements.guestNameDisplay.textContent = ticket.guest_name;
-    if (elements.ticketStatusBadge) {
-      elements.ticketStatusBadge.textContent = ticket.ticket_status.toUpperCase();
-      elements.ticketStatusBadge.className = `status-badge status-${ticket.ticket_status}`;
+    if (elements.ticketGuestName) elements.ticketGuestName.textContent = ticket.guest_name;
+    if (elements.guestStatus) elements.guestStatus.textContent = ticket.ticket_status.toUpperCase();
+    if (elements.ticketIdLabel) elements.ticketIdLabel.textContent = `ID: ${ticket.ticket_id.slice(0, 8)}...`;
+
+    if (ticket.ticket_status === "used") {
+      if (elements.ticketUsedNotice) elements.ticketUsedNotice.classList.remove("hidden");
+    } else {
+      if (elements.ticketUsedNotice) elements.ticketUsedNotice.classList.add("hidden");
     }
 
-    // Gera QR Code
-    if (elements.qrCodeCanvas && window.QRCode) {
+    if (elements.qrCode && window.QRCode) {
+      elements.qrCode.innerHTML = "";
       const qrData = JSON.stringify({
         ticket_id: ticket.ticket_id,
         qr_token: ticket.qr_token
       });
-      QRCode.toCanvas(elements.qrCodeCanvas, qrData, { width: 220 }, (err) => {
-        if (err) console.error("Erro ao gerar QR Code:", err);
+      new window.QRCode(elements.qrCode, {
+        text: qrData,
+        width: 180,
+        height: 180,
+        colorDark: "#000000",
+        colorLight: "#ffffff",
+        correctLevel: window.QRCode.CorrectLevel.H
       });
     }
   }
 
-  function renderNoTicket() {
-    if (elements.claimForm) elements.claimForm.style.display = "block";
-    if (elements.ticketContainer) elements.ticketContainer.style.display = "none";
+  function renderNoTicketCard() {
+    if (elements.noTicketCard) elements.noTicketCard.classList.remove("hidden");
+    if (elements.ticketCard) elements.ticketCard.classList.add("hidden");
+    if (elements.guestStatus) elements.guestStatus.textContent = "AGUARDANDO";
   }
 
   async function handleClaimTicket(e) {
     e.preventDefault();
-    const code = elements.claimCodeInput.value.trim();
+    const code = elements.ticketCode ? elements.ticketCode.value.trim() : "";
     if (!code) return;
 
     try {
       const { error } = await supabase.rpc("claim_ticket", { p_code: code });
       if (error) throw error;
       alert("Ingresso resgatado com sucesso!");
+      if (elements.ticketCode) elements.ticketCode.value = "";
       await loadMyTicket();
     } catch (err) {
-      alert(err.message || "Não foi possível resgatar o ingresso.");
+      alert(err.message || "Código inválido ou já resgatado.");
     }
   }
 
-  // 7. PAINEL DO ADMINISTRADOR (ADMIN)
-  async function showAdminPanel() {
-    if (elements.adminView) elements.adminView.style.display = "block";
-    if (elements.guestView) elements.guestView.style.display = "none";
-    await loadAdminTicketList();
-  }
-
+  // 6. PAINEL DO ADMINISTRADOR
   async function handleCreateTicket(e) {
     e.preventDefault();
-    const guestName = elements.guestNameInput.value.trim();
-    if (!guestName) return;
+    const name = elements.guestName ? elements.guestName.value.trim() : "";
+    if (!name) return;
 
     try {
-      const { data, error } = await supabase.rpc("create_ticket", { p_guest_name: guestName });
+      const { data, error } = await supabase.rpc("create_ticket", { p_guest_name: name });
       if (error) throw error;
 
-      const accessCode = data && data[0] ? data[0].access_code : "CÓDIGO GERADO";
-      if (elements.createdCodeDisplay) {
-        elements.createdCodeDisplay.style.display = "block";
-        elements.createdCodeDisplay.innerHTML = `Código de <strong>${guestName}</strong>: <span class="code-highlight" style="font-size: 1.2rem; font-weight: bold; color: #00ffcc;">${accessCode}</span>`;
-      }
-      elements.guestNameInput.value = "";
+      const code = data && data[0] ? data[0].access_code : "CÓDIGO GERADO";
+      if (elements.newCode) elements.newCode.textContent = code;
+      if (elements.newCodeResult) elements.newCodeResult.classList.remove("hidden");
+
+      if (elements.guestName) elements.guestName.value = "";
       await loadAdminTicketList();
     } catch (err) {
       alert(err.message || "Erro ao gerar ingresso.");
     }
   }
 
+  function handleCopyCode() {
+    if (elements.newCode && elements.newCode.textContent) {
+      navigator.clipboard.writeText(elements.newCode.textContent).then(() => {
+        if (elements.copyCodeButton) {
+          elements.copyCodeButton.textContent = "COPIADO! ✓";
+          setTimeout(() => {
+            elements.copyCodeButton.textContent = "COPIAR CÓDIGO";
+          }, 2000);
+        }
+      });
+    }
+  }
+
   async function loadAdminTicketList() {
-    if (!elements.adminTicketsTable) return;
+    if (!elements.ticketsTableBody) return;
 
     try {
       const { data, error } = await supabase.rpc("admin_ticket_list");
       if (error) throw error;
 
+      const table = elements.ticketsTableBody.closest("table");
+      if (table) {
+        const thead = table.querySelector("thead");
+        if (thead) {
+          thead.innerHTML = "<tr><th>CONVIDADO</th><th>CÓDIGO</th><th>STATUS</th><th>CRIADO EM</th><th>UTILIZADO EM</th></tr>";
+        }
+      }
+
       if (!data || data.length === 0) {
-        elements.adminTicketsTable.innerHTML = "<tr><td colspan='4'>Nenhum ingresso cadastrado.</td></tr>";
+        elements.ticketsTableBody.innerHTML = '<tr><td colspan="5" class="muted">Nenhum ingresso cadastrado.</td></tr>';
         return;
       }
 
-      // Exibe a lista completa de ingressos COM O CÓDIGO DE ACESSO VISÍVEL
-      const rowsHtml = data.map(t => {
-        const dateStr = t.created_at ? new Date(t.created_at).toLocaleString("pt-BR") : "-";
-        return `
-          <tr>
-            <td><strong>${t.guest_name || "-"}</strong></td>
-            <td><code style="background: #111; padding: 4px 8px; border-radius: 4px; color: #00ffcc; font-weight: bold;">${t.access_code || "-"}</code></td>
-            <td><span class="status-badge status-${t.ticket_status}">${t.ticket_status}</span></td>
-            <td><small>${dateStr}</small></td>
-          </tr>
-        `;
+      const rows = data.map(t => {
+        const createdStr = t.created_at ? new Date(t.created_at).toLocaleString("pt-BR") : "-";
+        const usedStr = t.used_at ? new Date(t.used_at).toLocaleString("pt-BR") : "-";
+        return '<tr>' +
+          '<td><strong>' + (t.guest_name || "-") + '</strong></td>' +
+          '<td><code style="background: #111; padding: 4px 8px; border-radius: 4px; color: #00ffcc; font-weight: bold; letter-spacing: 1px;">' + (t.access_code || "-") + '</code></td>' +
+          '<td><span class="status-pill">' + t.ticket_status + '</span></td>' +
+          '<td><small>' + createdStr + '</small></td>' +
+          '<td><small>' + usedStr + '</small></td>' +
+        '</tr>';
       }).join("");
 
-      elements.adminTicketsTable.innerHTML = `
-        <thead>
-          <tr>
-            <th>Convidado</th>
-            <th>Código de Acesso</th>
-            <th>Status</th>
-            <th>Criado em</th>
-          </tr>
-        </thead>
-        <tbody>${rowsHtml}</tbody>
-      `;
+      elements.ticketsTableBody.innerHTML = rows;
     } catch (err) {
       console.error("Erro ao listar ingressos:", err);
+      elements.ticketsTableBody.innerHTML = '<tr><td colspan="5" style="color: #ff3366;">Erro ao carregar dados.</td></tr>';
     }
   }
 
-  async function handleManualRedeem(e) {
-    e.preventDefault();
-    const inputVal = elements.redeemInput.value.trim();
-    if (!inputVal) return;
+  // 7. LEITOR DE QR CODE COM CÂMERA
+  async function startCameraScanner() {
+    if (typeof Html5Qrcode === "undefined") {
+      if (elements.scanResult) elements.scanResult.textContent = "BIBLIOTECA DE CÂMERA NÃO CARREGADA";
+      return;
+    }
 
     try {
-      let ticketId, qrToken;
-      if (inputVal.startsWith("{")) {
-        const parsed = JSON.parse(inputVal);
-        ticketId = parsed.ticket_id;
-        qrToken = parsed.qr_token;
-      } else {
-        alert("Cole os dados JSON válidos do QR Code.");
+      if (!html5QrcodeScanner) {
+        html5QrcodeScanner = new Html5Qrcode("reader");
+      }
+
+      await html5QrcodeScanner.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: { width: 220, height: 220 } },
+        async (decodedText) => {
+          await processScannedQrData(decodedText);
+        },
+        () => {}
+      );
+
+      if (elements.startScannerButton) elements.startScannerButton.disabled = true;
+      if (elements.stopScannerButton) elements.stopScannerButton.disabled = false;
+      if (elements.scanResult) elements.scanResult.textContent = "CÂMERA ATIVA // APONTE PARA O QR CODE";
+    } catch (err) {
+      if (elements.scanResult) elements.scanResult.textContent = "ERRO AO ACESSAR CÂMERA: " + (err.message || err);
+    }
+  }
+
+  async function stopCameraScanner() {
+    if (html5QrcodeScanner && html5QrcodeScanner.isScanning) {
+      try {
+        await html5QrcodeScanner.stop();
+        if (elements.startScannerButton) elements.startScannerButton.disabled = false;
+        if (elements.stopScannerButton) elements.stopScannerButton.disabled = true;
+        if (elements.scanResult) elements.scanResult.textContent = "LEITOR DESATIVADO";
+      } catch (err) {
+        console.error("Erro ao parar leitor:", err);
+      }
+    }
+  }
+
+  async function processScannedQrData(qrData) {
+    try {
+      const parsed = JSON.parse(qrData);
+      if (!parsed.ticket_id || !parsed.qr_token) {
+        if (elements.scanResult) elements.scanResult.innerHTML = '<span style="color: #ff3366;">❌ DADOS DO QR CODE INVÁLIDOS</span>';
         return;
       }
 
       const { data, error } = await supabase.rpc("redeem_ticket", {
-        p_ticket_id: ticketId,
-        p_qr_token: qrToken
+        p_ticket_id: parsed.ticket_id,
+        p_qr_token: parsed.qr_token
       });
 
       if (error) throw error;
 
       const res = data && data[0] ? data[0] : { result: "INVALID", guest_name: "" };
+
       if (res.result === "AUTHORIZED") {
-        elements.redeemResult.innerHTML = `<div style="color: #00ffcc; font-weight: bold; margin-top: 10px;">✅ ENTRADA AUTORIZADA! Convidado: ${res.guest_name}</div>`;
+        if (elements.scanResult) elements.scanResult.innerHTML = '<span style="color: #00ffcc; font-weight: bold;">✅ ENTRADA AUTORIZADA!<br>CONVIDADO: ' + res.guest_name + '</span>';
       } else if (res.result === "ALREADY_USED") {
-        elements.redeemResult.innerHTML = `<div style="color: #ffcc00; font-weight: bold; margin-top: 10px;">⚠️ INGRESSO JÁ UTILIZADO! Convidado: ${res.guest_name}</div>`;
+        if (elements.scanResult) elements.scanResult.innerHTML = '<span style="color: #ffcc00; font-weight: bold;">⚠️ INGRESSO JÁ UTILIZADO!<br>CONVIDADO: ' + res.guest_name + '</span>';
       } else {
-        elements.redeemResult.innerHTML = `<div style="color: #ff3366; font-weight: bold; margin-top: 10px;">❌ INGRESSO INVÁLIDO!</div>`;
+        if (elements.scanResult) elements.scanResult.innerHTML = '<span style="color: #ff3366; font-weight: bold;">❌ INGRESSO INVÁLIDO</span>';
       }
 
-      elements.redeemInput.value = "";
       await loadAdminTicketList();
     } catch (err) {
-      elements.redeemResult.innerHTML = `<div style="color: #ff3366; margin-top: 10px;">❌ Erro ao validar: ${err.message}</div>`;
+      if (elements.scanResult) elements.scanResult.innerHTML = '<span style="color: #ff3366;">❌ ERRO NA LEITURA: ' + (err.message || err) + '</span>';
     }
   }
 
-  // 8. HELPERS DE INTERFACE
-  function showAuthSection() {
-    if (elements.authSection) elements.authSection.style.display = "block";
-    if (elements.dashboardSection) elements.dashboardSection.style.display = "none";
-  }
-
-  function showDashboardSection() {
-    if (elements.authSection) elements.authSection.style.display = "none";
-    if (elements.dashboardSection) elements.dashboardSection.style.display = "block";
-  }
-
-  function showAuthError(msg) {
-    if (elements.authError) {
-      elements.authError.style.display = "block";
-      elements.authError.textContent = msg;
+  // 8. MENSAGENS E HELPERS
+  function showAuthMessage(msg) {
+    if (elements.authMessage) {
+      elements.authMessage.textContent = msg;
+      elements.authMessage.style.color = "#ff3366";
     }
   }
 
-  function clearAuthError() {
-    if (elements.authError) {
-      elements.authError.style.display = "none";
-      elements.authError.textContent = "";
+  function clearAuthMessage() {
+    if (elements.authMessage) {
+      elements.authMessage.textContent = "";
     }
-  }
-
-  function showGlobalError(msg) {
-    const errDiv = document.createElement("div");
-    errDiv.style.cssText = "background: #ff3366; color: white; padding: 12px; text-align: center; font-weight: bold;";
-    errDiv.textContent = msg;
-    document.body.prepend(errDiv);
   }
 })();
-        
