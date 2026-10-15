@@ -1,10 +1,11 @@
-const CACHE_NAME = "projeto-d-shell-v13";
+const CACHE_NAME = "projeto-d-shell-v14";
 
 // Arquivos base da aplicação
 const APP_SHELL = [
   "./",
   "./index.html",
   "./styles.css",
+  "./config.js",
   "./app.js",
   "./manifest.json",
   "./assets/logo.png"
@@ -15,7 +16,7 @@ self.addEventListener("install", (event) => {
   self.skipWaiting();
 });
 
-// Limpeza automática de caches antigos no dispositivo
+// Ativação e limpeza automática de caches antigos no dispositivo
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
@@ -36,6 +37,7 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   const url = new URL(event.request.url);
 
+  // Ignora requisições de outros domínios (como as chamadas da API do Supabase) e métodos não-GET
   if (event.request.method !== "GET" || url.origin !== self.location.origin) return;
 
   event.respondWith(
