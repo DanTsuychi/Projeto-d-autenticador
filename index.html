@@ -1,177 +1,206 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>D Autenticador - Pagamento e Acesso</title>
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
-    }
-
-    body {
-      background-color: #0f172a;
-      color: #f8fafc;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      padding: 20px;
-    }
-
-    .card {
-      background-color: #1e293b;
-      border: 1px solid #334155;
-      border-radius: 16px;
-      padding: 32px 24px;
-      width: 100%;
-      max-width: 380px;
-      text-align: center;
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
-    }
-
-    .logo {
-      font-size: 26px;
-      font-weight: 700;
-      color: #38bdf8;
-      margin-bottom: 8px;
-    }
-
-    .title {
-      font-size: 18px;
-      font-weight: 600;
-      color: #e2e8f0;
-      margin-bottom: 6px;
-    }
-
-    .description {
-      font-size: 14px;
-      color: #94a3b8;
-      margin-bottom: 20px;
-    }
-
-    .price-tag {
-      font-size: 32px;
-      font-weight: 700;
-      color: #22c55e;
-      margin-bottom: 24px;
-    }
-
-    /* Container dos botões Pix e WhatsApp */
-    .pix-actions-container {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      width: 100%;
-    }
-
-    .btn-pix, .btn-whatsapp {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 100%;
-      padding: 14px 20px;
-      font-size: 16px;
-      font-weight: 600;
-      border-radius: 8px;
-      text-decoration: none;
-      cursor: pointer;
-      transition: background-color 0.2s, transform 0.1s;
-      box-sizing: border-box;
-    }
-
-    /* Estilo do botão Copiar Pix */
-    .btn-pix {
-      background-color: #00bdae;
-      color: #ffffff;
-      border: none;
-    }
-
-    .btn-pix:hover {
-      background-color: #00998c;
-    }
-
-    /* Estilo do botão WhatsApp */
-    .btn-whatsapp {
-      background-color: #25d366;
-      color: #ffffff;
-      border: none;
-    }
-
-    .btn-whatsapp:hover {
-      background-color: #1ebc57;
-    }
-
-    .btn-pix:active, .btn-whatsapp:active {
-      transform: scale(0.98);
-    }
-
-    .pix-info {
-      font-size: 13px;
-      color: #64748b;
-      margin-top: 18px;
-    }
-
-    .pix-info strong {
-      color: #cbd5e1;
-    }
-  </style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#020202">
+  <meta name="description" content="Autenticação de ingressos e acesso ao evento.">
+  <title>Autenticador de Acesso</title>
+  
+  <!-- LOGO NA RAIZ DO REPOSITÓRIO -->
+  <link rel="icon" type="image/png" href="./logo.png">
+  <link rel="manifest" href="./manifest.json">
+  <link rel="stylesheet" href="./styles.css">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
+  <!-- ELEMENTOS DE ILUMINAÇÃO NEON VERMELHA COM FALHAS -->
+  <div class="ambient ambient-one faulty-neon"></div>
+  <div class="ambient ambient-two faulty-neon-slow"></div>
+  <div class="scanlines"></div>
 
-  <div class="card">
-    <div class="logo">D Autenticador</div>
-    <h1 class="title">Adquirir Código de Acesso</h1>
-    <p class="description">Realize o pagamento via Pix para solicitar a liberação do seu código.</p>
-    
-    <div class="price-tag">R$ 50,00</div>
+  <header class="topbar">
+    <a class="brand" href="./" aria-label="Início">
+      <img src="./logo.png" alt="Logo" class="brand-logo" onerror="this.style.display='none'">
+    </a>
+    <span class="system-status"><i></i> SISTEMA DE ACESSO</span>
+  </header>
 
-    <!-- Bloco de Ações Pix / WhatsApp -->
-    <div class="pix-actions-container">
-      <!-- Botão Copiar Chave Pix -->
-      <button type="button" class="btn-pix" id="btnCopyPix" onclick="copiarChavePix()">
-        Copiar chave Pix
-      </button>
+  <main class="shell">
+    <section id="authView" class="auth-layout">
+      <div class="hero-copy">
+        <p class="eyebrow">EVENT ACCESS PROTOCOL // 001</p>
+        <h1>SEU ACESSO.<br><span>SUA NOITE.</span></h1>
+        <p class="hero-description">Autentique seu ingresso e mantenha seu acesso pronto para a entrada do evento.</p>
+        <div class="hero-lines"><span></span><span></span><span></span><span></span><span></span></div>
+        <p class="microcopy">SECURE ENTRY // ONE TICKET · ONE ENTRY</p>
+      </div>
 
-      <!-- Botão Solicitar Código (WhatsApp) -->
-      <a 
-        href="https://wa.me/5598984650323?text=Oi%2C%20j%C3%A1%20fiz%20meu%20pagamento%2C%20quero%20solicitar%20meu%20c%C3%B3digo%20de%20acesso" 
-        target="_blank" 
-        rel="noopener noreferrer" 
-        class="btn-whatsapp"
-      >
-        Solicitar código
-      </a>
-    </div>
+      <div class="panel auth-panel">
+        <div class="panel-heading">
+          <span class="panel-kicker">IDENTIFICAÇÃO</span>
+          <span class="live-dot">ONLINE</span>
+        </div>
 
-    <div class="pix-info">
-      Chave Pix: <strong>98984650323</strong>
-    </div>
-  </div>
+        <!-- LOGO CENTRALIZADA NA RAIZ COM GLITCH -->
+        <div class="glitch-logo-container">
+          <img src="./logo.png" alt="Logo do Evento" class="glitch-logo">
+        </div>
 
-  <script>
-    function copiarChavePix() {
-      const chavePix = "98984650323";
-      
-      navigator.clipboard.writeText(chavePix).then(() => {
-        const btn = document.getElementById("btnCopyPix");
-        const textoOriginal = btn.innerText;
-        
-        btn.innerText = "Chave Pix Copiada!";
-        btn.style.backgroundColor = "#28a745";
-        
-        setTimeout(() => {
-          btn.innerText = textoOriginal;
-          btn.style.backgroundColor = "#00bdae";
-        }, 2000);
-      }).catch(err => {
-        alert("Sua chave Pix é: " + chavePix);
-      });
-    }
-  </script>
+        <div class="tabs" role="tablist" aria-label="Autenticação">
+          <button class="tab active" id="loginTab" type="button">ENTRAR</button>
+          <button class="tab" id="signupTab" type="button">CRIAR CONTA</button>
+        </div>
 
+        <form id="authForm">
+          <label for="displayName" id="displayNameLabel" class="hidden">Nome completo</label>
+          <input id="displayName" name="displayName" type="text" autocomplete="name" placeholder="NOME COMPLETO" class="hidden" maxlength="100">
+          
+          <label for="email">E-MAIL</label>
+          <input id="email" name="email" type="email" autocomplete="email" placeholder="voce@exemplo.com" required>
+          
+          <label for="password">SENHA</label>
+          <input id="password" name="password" type="password" autocomplete="current-password" placeholder="MÍNIMO DE 8 CARACTERES" minlength="8" required>
+          
+          <button class="button primary full" type="submit" id="authSubmit">ENTRAR NO SISTEMA <span>↗</span></button>
+        </form>
+
+        <p id="authMessage" class="message" role="status" aria-live="polite"></p>
+        <p class="fine-print">O acesso é individual. Não compartilhe seu QR Code.</p>
+      </div>
+    </section>
+
+    <section id="appView" class="hidden">
+      <div class="dashboard-header">
+        <div>
+          <p class="eyebrow">PAINEL DE CONTROLE</p>
+          <h1 id="welcomeTitle">BEM-VINDO.</h1>
+          <p id="roleCaption" class="muted">Acesso autenticado.</p>
+        </div>
+        <button id="logoutButton" class="button ghost" type="button">SAIR ↗</button>
+      </div>
+
+      <!-- PAINEL CONVIDADO -->
+      <section id="guestPanel" class="hidden">
+        <div class="section-heading">
+          <div><p class="eyebrow">ÁREA DO CONVIDADO</p><h2>SEU INGRESSO</h2></div>
+          <span class="status-pill" id="guestStatus">AGUARDANDO</span>
+        </div>
+
+        <div id="noTicketCard" class="panel claim-panel">
+          <div class="claim-symbol">⚡</div>
+          <div class="claim-copy">
+            <h3>GARANTA SEU INGRESSO</h3>
+            <p class="muted">Compre via Pix por R$ 30,00 e solicite seu códigopara resgatar aqui no site.</p>
+          </div>
+
+          <button id="buyPixBtn" class="button primary full buy-pix-btn" type="button">
+            COMPRAR INGRESSO VIA PIX (R$ 30,00) ⚡
+          </button>
+
+          <div class="divider-text">─── OU SE VOCÊ JÁ POSSUI UM CÓDIGO ───</div>
+
+          <form id="claimForm" class="claim-form">
+            <label for="ticketCode">CÓDIGO DE ACESSO</label>
+            <input id="ticketCode" inputmode="numeric" autocomplete="one-time-code" maxlength="9" pattern="[0-9]{9}" placeholder="000 000 000">
+            <button class="button ghost full" type="submit">RESGATAR COM CÓDIGO ↗</button>
+          </form>
+        </div>
+
+        <!-- MODAL / CARD PIX -->
+        <div id="pixPaymentCard" class="panel pix-card hidden">
+          <div class="panel-heading">
+            <span class="panel-kicker">PAGAMENTO PIX</span>
+            <span class="live-dot warning-dot">AGUARDANDO</span>
+          </div>
+          <h3>PAGUE COM O QR CODE ABAIXO</h3>
+          <p class="muted">Abra o app do seu banco e escaneie ou copie o código Pix.</p>
+
+          <img id="pixQrImg" class="pix-qr-img" src="" alt="QR Code Pix">
+
+          <input id="pixCopyPasteInput" class="pix-copy-input" readonly type="text" value="">
+          <button id="copyPixBtn" class="button primary full" type="button">COPIAR CÓDIGO PIX 📋</button>
+
+          <p class="fine-print pix-notice">
+            ⏳ O sistema identificará o pagamento automaticamente e liberará seu ingresso nesta tela.
+          </p>
+        </div>
+
+        <!-- CARD TICKET DIGITAL -->
+        <div id="ticketCard" class="panel ticket-card hidden">
+          <div class="ticket-top"><span class="panel-kicker">DIGITAL PASS</span><span class="ticket-stamp">VALIDAÇÃO ÚNICA</span></div>
+          <div class="ticket-main">
+            <div class="ticket-details">
+              <p class="eyebrow">TITULAR DO INGRESSO</p>
+              <h2 id="ticketGuestName">CONVIDADO</h2>
+              <p class="muted">Apresente este QR Code na entrada oficial.</p>
+              <p id="ticketIdLabel" class="ticket-id"></p>
+              <div id="ticketUsedNotice" class="used-notice hidden">ESTE INGRESSO JÁ FOI UTILIZADO</div>
+            </div>
+            <div class="qr-frame"><div id="qrCode" aria-label="QR Code do ingresso"></div><span>SCAN TO ENTER</span></div>
+          </div>
+          <p class="fine-print">O QR Code é pessoal. Uma vez validado pela equipe, não poderá ser usado novamente.</p>
+        </div>
+      </section>
+
+      <!-- PAINEL ADMIN -->
+      <section id="adminPanel" class="hidden">
+        <div class="section-heading">
+          <div><p class="eyebrow">NÍVEL DE ACESSO // ADMIN</p><h2>CONTROLE DE ENTRADA</h2></div>
+          <span class="status-pill admin-pill">ADMINISTRADOR</span>
+        </div>
+        <div class="admin-grid">
+          <div class="panel">
+            <div class="panel-heading"><span class="panel-kicker">01 / NOVO INGRESSO</span></div>
+            <h3>GERAR CÓDIGO</h3>
+            <p class="muted">Crie um ingresso e entregue o código de resgate ao convidado.</p>
+            <form id="createTicketForm">
+              <label for="guestName">NOME DO CONVIDADO</label>
+              <input id="guestName" maxlength="100" placeholder="NOME COMPLETO" required>
+              <button class="button primary full" type="submit">GERAR INGRESSO ↗</button>
+            </form>
+            <div id="newCodeResult" class="code-result hidden">
+              <p class="eyebrow">CÓDIGO GERADO — MOSTRADO UMA VEZ</p>
+              <strong id="newCode"></strong>
+              <button id="copyCodeButton" class="button ghost full" type="button">COPIAR CÓDIGO</button>
+              <p class="fine-print">Envie este código apenas ao convidado correto. Ele não poderá ser exibido novamente.</p>
+            </div>
+          </div>
+          <div class="panel scanner-panel">
+            <div class="panel-heading"><span class="panel-kicker">02 / VALIDAR ENTRADA</span></div>
+            <h3>LEITOR DE QR CODE</h3>
+            <p class="muted">Permita o acesso à câmera e enquadre o QR Code do ingresso.</p>
+            <div id="reader" class="reader"></div>
+            <div class="scanner-actions">
+              <button id="startScannerButton" class="button primary" type="button">ATIVAR CÂMERA</button>
+              <button id="stopScannerButton" class="button ghost" type="button" disabled>PARAR</button>
+            </div>
+            <div id="scanResult" class="scan-result" role="status" aria-live="polite">LEITOR DESATIVADO</div>
+          </div>
+        </div>
+        <div class="panel table-panel">
+          <div class="panel-heading"><span class="panel-kicker">03 / REGISTRO DE INGRESSOS</span><button id="refreshTicketsButton" class="button ghost small" type="button">ATUALIZAR ↻</button></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>CONVIDADO</th><th>STATUS</th><th>CRIADO EM</th><th>UTILIZADO EM</th></tr></thead>
+              <tbody id="ticketsTableBody"><tr><td colspan="4" class="muted">Carregando registros…</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+      <p id="appMessage" class="message" role="status" aria-live="polite"></p>
+    </section>
+  </main>
+
+  <footer class="footer"><span>ACCESS CONTROL SYSTEM <b>●</b></span></footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <script src="./config.js"></script>
+  <script src="./app.js"></script>
 </body>
 </html>
