@@ -1,4 +1,4 @@
-const CACHE_NAME = "projeto-d-shell-v14";
+const CACHE_NAME = "projeto-d-shell-v22";
 
 // Arquivos base da aplicação
 const APP_SHELL = [
@@ -32,12 +32,12 @@ self.addEventListener("activate", (event) => {
 });
 
 // Estratégia REDE PRIMEIRO (Network-First)
-// Busca sempre o config.js e scripts mais recentes da internet.
-// Usa o cache local apenas se o dispositivo estiver totalmente sem internet.
+// Busca sempre os arquivos mais recentes da internet/GitHub.
+// Usa o cache local apenas se o dispositivo estiver totalmente offline.
 self.addEventListener("fetch", (event) => {
   const url = new URL(event.request.url);
 
-  // Ignora requisições de outros domínios (como as chamadas da API do Supabase) e métodos não-GET
+  // Ignora chamadas externas (como a API do Supabase) e métodos não-GET
   if (event.request.method !== "GET" || url.origin !== self.location.origin) return;
 
   event.respondWith(
