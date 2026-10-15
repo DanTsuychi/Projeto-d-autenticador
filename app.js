@@ -3,7 +3,6 @@
    ======================================================== */
 
 (function () {
-  // 1. CONFIGURAÇÃO E INICIALIZAÇÃO DO SUPABASE
   const config = window.PROJETO_D_CONFIG || {};
   if (!config.supabaseUrl || !config.supabaseKey) {
     showAuthMessage("Erro: configure a URL e a chave pública em config.js.");
@@ -16,7 +15,6 @@
   let html5QrcodeScanner = null;
   let elements = {};
 
-  // 2. INICIALIZAÇÃO SEGURA DA APLICAÇÃO
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", initApp);
   } else {
@@ -31,11 +29,8 @@
 
   function bindElements() {
     elements = {
-      // Seções
       authView: document.getElementById("authView"),
       appView: document.getElementById("appView"),
-
-      // Formulário de Autenticação
       loginTab: document.getElementById("loginTab"),
       signupTab: document.getElementById("signupTab"),
       authForm: document.getElementById("authForm"),
@@ -45,16 +40,15 @@
       password: document.getElementById("password"),
       authSubmit: document.getElementById("authSubmit"),
       authMessage: document.getElementById("authMessage"),
-
-      // Header do Dashboard
       welcomeTitle: document.getElementById("welcomeTitle"),
       roleCaption: document.getElementById("roleCaption"),
       logoutButton: document.getElementById("logoutButton"),
-
-      // Painel Convidado
       guestPanel: document.getElementById("guestPanel"),
       guestStatus: document.getElementById("guestStatus"),
       noTicketCard: document.getElementById("noTicketCard"),
+      buyPixBtn: document.getElementById("buyPixBtn"),
+      pixPaymentCard: document.getElementById("pixPaymentCard"),
+      hasCodeBtn: document.getElementById("hasCodeBtn"),
       ticketCard: document.getElementById("ticketCard"),
       claimForm: document.getElementById("claimForm"),
       ticketCode: document.getElementById("ticketCode"),
@@ -62,8 +56,6 @@
       ticketIdLabel: document.getElementById("ticketIdLabel"),
       ticketUsedNotice: document.getElementById("ticketUsedNotice"),
       qrCode: document.getElementById("qrCode"),
-
-      // Painel Admin
       adminPanel: document.getElementById("adminPanel"),
       createTicketForm: document.getElementById("createTicketForm"),
       guestName: document.getElementById("guestName"),
@@ -80,7 +72,6 @@
   }
 
   function setupEventListeners() {
-    // Alternância de Abas (Entrar / Criar Conta)
     if (elements.loginTab) {
       elements.loginTab.addEventListener("click", (e) => {
         e.preventDefault();
@@ -94,11 +85,12 @@
       });
     }
 
-    // Submissão de Autenticação
     if (elements.authForm) elements.authForm.addEventListener("submit", handleAuthSubmit);
     if (elements.logoutButton) elements.logoutButton.addEventListener("click", handleLogout);
 
-    // Convidado
+    // Fluxo do Pix e Resgate
+    if (elements.buyPixBtn) elements.buyPixBtn.addEventListener("click", handleBuyPix);
+    if (elements.hasCodeBtn) elements.hasCodeBtn.addEventListener("click", handleShowClaimForm);
     if (elements.claimForm) elements.claimForm.addEventListener("submit", handleClaimTicket);
 
     // Admin
@@ -110,7 +102,6 @@
     if (elements.startScannerButton) elements.startScannerButton.addEventListener("click", startCameraScanner);
     if (elements.stopScannerButton) elements.stopScannerButton.addEventListener("click", stopCameraScanner);
 
-    // Escuta mudanças de sessão do Supabase
     supabase.auth.onAuthStateChange((event, session) => {
       if (session) {
         loadUserProfile();
@@ -120,7 +111,6 @@
     });
   }
 
-  // 3. LÓGICA DAS ABAS DE AUTENTICAÇÃO
   function switchAuthTab(mode) {
     authMode = mode;
     clearAuthMessage();
@@ -191,7 +181,6 @@
     showAuthView();
   }
 
-  // 4. NAVEGAÇÃO ENTRE TELAS
   function showAuthView() {
     if (elements.authView) elements.authView.classList.remove("hidden");
     if (elements.appView) elements.appView.classList.add("hidden");
@@ -233,7 +222,26 @@
     }
   }
 
-  // 5. PAINEL DO CONVIDADO
+  // CÓPIA AUTOMÁTICA DA CHAVE PIX E MUDANÇA DE TELA
+  function handleBuyPix() {
+    const pixKey = "98984650323";
+
+    navigator.clipboard.writeText(pixKey).then(() => {
+      if (elements.noTicketCard) elements.noTicketCard.classList.add("hidden");
+      if (elements.pixPaymentCard) elements.pixPaymentCard.classList.remove("hidden");
+    }).catch(() => {
+      // Caso o navegador bloqueie a cópia direta sem permissão
+      if (elements.noTicketCard) elements.noTicketCard.classList.add("hidden");
+      if (elements.pixPaymentCard) elements.pixPaymentCard.classList.remove("hidden");
+    });
+  }
+
+  function handleShowClaimForm() {
+    if (elements.pixPaymentCard) elements.pixPaymentCard.classList.add("hidden");
+    if (elements.noTicketCard) elements.noTicketCard.classList.remove("hidden");
+    if (elements.ticketCode) elements.ticketCode.focus();
+  }
+
   async function loadMyTicket() {
     try {
       const { data, error } = await supabase.rpc("my_ticket");
@@ -251,6 +259,7 @@
 
   function renderTicketCard(ticket) {
     if (elements.noTicketCard) elements.noTicketCard.classList.add("hidden");
+    if (elements.pixPaymentCard) elements.pixPaymentCard.classList.add("hidden");
     if (elements.ticketCard) elements.ticketCard.classList.remove("hidden");
 
     if (elements.ticketGuestName) elements.ticketGuestName.textContent = ticket.guest_name;
@@ -282,6 +291,7 @@
 
   function renderNoTicketCard() {
     if (elements.noTicketCard) elements.noTicketCard.classList.remove("hidden");
+    if (elements.pixPaymentCard) elements.pixPaymentCard.classList.add("hidden");
     if (elements.ticketCard) elements.ticketCard.classList.add("hidden");
     if (elements.guestStatus) elements.guestStatus.textContent = "AGUARDANDO";
   }
@@ -302,7 +312,7 @@
     }
   }
 
-  // 6. PAINEL DO ADMINISTRADOR
+  // PAINEL DO ADMINISTRADOR
   async function handleCreateTicket(e) {
     e.preventDefault();
     const name = elements.guestName ? elements.guestName.value.trim() : "";
@@ -361,7 +371,7 @@
         const usedStr = t.used_at ? new Date(t.used_at).toLocaleString("pt-BR") : "-";
         return '<tr>' +
           '<td><strong>' + (t.guest_name || "-") + '</strong></td>' +
-          '<td><code style="background: #111; padding: 4px 8px; border-radius: 4px; color: #00ffcc; font-weight: bold; letter-spacing: 1px;">' + (t.access_code || "-") + '</code></td>' +
+          '<td><code style="background: #111; padding: 4px 8px; border-radius: 4px; color: #ff0055; font-weight: bold; letter-spacing: 1px;">' + (t.access_code || "-") + '</code></td>' +
           '<td><span class="status-pill">' + t.ticket_status + '</span></td>' +
           '<td><small>' + createdStr + '</small></td>' +
           '<td><small>' + usedStr + '</small></td>' +
@@ -375,7 +385,7 @@
     }
   }
 
-  // 7. LEITOR DE QR CODE COM CÂMERA
+  // LEITOR DE QR CODE COM CÂMERA
   async function startCameraScanner() {
     if (typeof Html5Qrcode === "undefined") {
       if (elements.scanResult) elements.scanResult.textContent = "BIBLIOTECA DE CÂMERA NÃO CARREGADA";
@@ -435,7 +445,7 @@
       const res = data && data[0] ? data[0] : { result: "INVALID", guest_name: "" };
 
       if (res.result === "AUTHORIZED") {
-        if (elements.scanResult) elements.scanResult.innerHTML = '<span style="color: #00ffcc; font-weight: bold;">✅ ENTRADA AUTORIZADA!<br>CONVIDADO: ' + res.guest_name + '</span>';
+        if (elements.scanResult) elements.scanResult.innerHTML = '<span style="color: #ff0055; font-weight: bold;">✅ ENTRADA AUTORIZADA!<br>CONVIDADO: ' + res.guest_name + '</span>';
       } else if (res.result === "ALREADY_USED") {
         if (elements.scanResult) elements.scanResult.innerHTML = '<span style="color: #ffcc00; font-weight: bold;">⚠️ INGRESSO JÁ UTILIZADO!<br>CONVIDADO: ' + res.guest_name + '</span>';
       } else {
@@ -448,7 +458,6 @@
     }
   }
 
-  // 8. MENSAGENS E HELPERS
   function showAuthMessage(msg) {
     if (elements.authMessage) {
       elements.authMessage.textContent = msg;
