@@ -1,6 +1,12 @@
-const CACHE_NAME = "projeto-d-shell-v22";
+/* ========================================================
+   PROJETO D — SERVICE WORKER (sw.js)
+   Versão: v26
+   Estratégia: Network-First (Rede Primeiro)
+   ======================================================== */
 
-// Arquivos base da aplicação
+const CACHE_NAME = "projeto-d-shell-v26";
+
+// Arquivos base da aplicação para cache offline
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -8,10 +14,10 @@ const APP_SHELL = [
   "./config.js",
   "./app.js",
   "./manifest.json",
-  "./assets/logo.png"
+  "./logo.png"
 ];
 
-// Instalação do Service Worker
+// Instalação e ativação imediata do Service Worker
 self.addEventListener("install", (event) => {
   self.skipWaiting();
 });
@@ -31,13 +37,13 @@ self.addEventListener("activate", (event) => {
   );
 });
 
-// Estratégia REDE PRIMEIRO (Network-First)
-// Busca sempre os arquivos mais recentes da internet/GitHub.
-// Usa o cache local apenas se o dispositivo estiver totalmente offline.
+// Estratégia REDE PRIMEIRO (Network-First):
+// Tenta buscar os arquivos mais atualizados do servidor/GitHub.
+// Se estiver sem internet (offline), recorre ao cache salvo.
 self.addEventListener("fetch", (event) => {
   const url = new URL(event.request.url);
 
-  // Ignora chamadas externas (como a API do Supabase) e métodos não-GET
+  // Ignora requisições que não sejam GET e chamadas externas (ex: API do Supabase, CDNs)
   if (event.request.method !== "GET" || url.origin !== self.location.origin) return;
 
   event.respondWith(
