@@ -4,14 +4,74 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#050505">
-  <meta name="description" content="Projeto D — autenticação de ingressos e acesso ao evento.">
-  <title>Projeto D | Autenticador</title>
+  <meta name="description" content="Autenticação de ingressos e acesso ao evento.">
+  <title>Autenticador de Acesso</title>
   <link rel="icon" type="image/png" href="./assets/logo.png">
   <link rel="manifest" href="./manifest.json">
   <link rel="stylesheet" href="./styles.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    /* Estilo e Animação Glitch para a Logo */
+    .glitch-logo-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 1rem 0 1.5rem 0;
+      width: 100%;
+    }
+
+    .glitch-logo {
+      width: 190px;
+      max-width: 75%;
+      height: auto;
+      display: block;
+      position: relative;
+      filter: drop-shadow(0 0 12px rgba(0, 255, 204, 0.4));
+      animation: logoGlitch 2.8s infinite ease-in-out;
+    }
+
+    @keyframes logoGlitch {
+      0% {
+        transform: translate(0);
+        filter: drop-shadow(2px 0 #ff0055) drop-shadow(-2px 0 #00ffcc);
+      }
+      2% {
+        transform: translate(-3px, 2px);
+        filter: drop-shadow(-3px 0 #ff0055) drop-shadow(3px 0 #00ffcc);
+      }
+      4% {
+        transform: translate(3px, -2px);
+        filter: drop-shadow(3px -2px #00ffcc);
+      }
+      6% {
+        transform: translate(0);
+        filter: drop-shadow(0 0 12px rgba(0, 255, 204, 0.4));
+      }
+      48% {
+        transform: translate(0);
+        filter: drop-shadow(0 0 12px rgba(0, 255, 204, 0.4));
+      }
+      50% {
+        transform: translate(-3px, -2px);
+        filter: drop-shadow(-3px 2px #ff0055);
+      }
+      52% {
+        transform: translate(3px, 1px);
+        filter: drop-shadow(2px -2px #00ffcc);
+      }
+      54% {
+        transform: translate(0);
+        filter: drop-shadow(0 0 12px rgba(0, 255, 204, 0.4));
+      }
+      100% {
+        transform: translate(0);
+        filter: drop-shadow(0 0 12px rgba(0, 255, 204, 0.4));
+      }
+    }
+  </style>
 </head>
 <body>
   <div class="ambient ambient-one"></div>
@@ -19,9 +79,8 @@
   <div class="scanlines"></div>
 
   <header class="topbar">
-    <a class="brand" href="./" aria-label="Projeto D início">
-      <img src="./assets/logo.png" alt="Logo da festa" class="brand-logo" onerror="this.style.display='none'">
-      <span class="brand-fallback">PROJETO <b>D</b></span>
+    <a class="brand" href="./" aria-label="Início">
+      <img src="./assets/logo.png" alt="Logo" class="brand-logo" onerror="this.style.display='none'">
     </a>
     <span class="system-status"><i></i> SISTEMA DE ACESSO</span>
   </header>
@@ -41,6 +100,12 @@
           <span class="panel-kicker">IDENTIFICAÇÃO</span>
           <span class="live-dot">ONLINE</span>
         </div>
+
+        <!-- LOGO CENTRALIZADA COM EFEITO GLITCH ACIMA DOS DADOS DE LOGIN -->
+        <div class="glitch-logo-container">
+          <img src="./assets/logo.png" alt="Logo do Evento" class="glitch-logo">
+        </div>
+
         <div class="tabs" role="tablist" aria-label="Autenticação">
           <button class="tab active" id="loginTab" type="button">ENTRAR</button>
           <button class="tab" id="signupTab" type="button">CRIAR CONTA</button>
@@ -87,7 +152,7 @@
           </form>
         </div>
         <div id="ticketCard" class="panel ticket-card hidden">
-          <div class="ticket-top"><span class="panel-kicker">PROJETO D / DIGITAL PASS</span><span class="ticket-stamp">VALIDAÇÃO ÚNICA</span></div>
+          <div class="ticket-top"><span class="panel-kicker">DIGITAL PASS</span><span class="ticket-stamp">VALIDAÇÃO ÚNICA</span></div>
           <div class="ticket-main">
             <div class="ticket-details">
               <p class="eyebrow">TITULAR DO INGRESSO</p>
@@ -150,7 +215,7 @@
     </section>
   </main>
 
-  <footer class="footer"><span>PROJETO D</span><span>ACCESS CONTROL SYSTEM <b>●</b></span></footer>
+  <footer class="footer"><span>ACCESS CONTROL SYSTEM <b>●</b></span></footer>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
