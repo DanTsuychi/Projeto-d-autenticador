@@ -3,84 +3,28 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#050505">
+  <meta name="theme-color" content="#020202">
   <meta name="description" content="Autenticação de ingressos e acesso ao evento.">
   <title>Autenticador de Acesso</title>
-  <link rel="icon" type="image/png" href="./assets/logo.png">
+  
+  <!-- LOGO NA RAIZ DO REPOSITÓRIO -->
+  <link rel="icon" type="image/png" href="./logo.png">
   <link rel="manifest" href="./manifest.json">
   <link rel="stylesheet" href="./styles.css">
+  
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
-  
-  <style>
-    /* Estilo e Animação Glitch para a Logo */
-    .glitch-logo-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      margin: 1rem 0 1.5rem 0;
-      width: 100%;
-    }
-
-    .glitch-logo {
-      width: 190px;
-      max-width: 75%;
-      height: auto;
-      display: block;
-      position: relative;
-      filter: drop-shadow(0 0 12px rgba(0, 255, 204, 0.4));
-      animation: logoGlitch 2.8s infinite ease-in-out;
-    }
-
-    @keyframes logoGlitch {
-      0% {
-        transform: translate(0);
-        filter: drop-shadow(2px 0 #ff0055) drop-shadow(-2px 0 #00ffcc);
-      }
-      2% {
-        transform: translate(-3px, 2px);
-        filter: drop-shadow(-3px 0 #ff0055) drop-shadow(3px 0 #00ffcc);
-      }
-      4% {
-        transform: translate(3px, -2px);
-        filter: drop-shadow(3px -2px #00ffcc);
-      }
-      6% {
-        transform: translate(0);
-        filter: drop-shadow(0 0 12px rgba(0, 255, 204, 0.4));
-      }
-      48% {
-        transform: translate(0);
-        filter: drop-shadow(0 0 12px rgba(0, 255, 204, 0.4));
-      }
-      50% {
-        transform: translate(-3px, -2px);
-        filter: drop-shadow(-3px 2px #ff0055);
-      }
-      52% {
-        transform: translate(3px, 1px);
-        filter: drop-shadow(2px -2px #00ffcc);
-      }
-      54% {
-        transform: translate(0);
-        filter: drop-shadow(0 0 12px rgba(0, 255, 204, 0.4));
-      }
-      100% {
-        transform: translate(0);
-        filter: drop-shadow(0 0 12px rgba(0, 255, 204, 0.4));
-      }
-    }
-  </style>
 </head>
 <body>
-  <div class="ambient ambient-one"></div>
-  <div class="ambient ambient-two"></div>
+  <!-- ELEMENTOS DE ILUMINAÇÃO NEON VERMELHA COM FALHAS -->
+  <div class="ambient ambient-one faulty-neon"></div>
+  <div class="ambient ambient-two faulty-neon-slow"></div>
   <div class="scanlines"></div>
 
   <header class="topbar">
     <a class="brand" href="./" aria-label="Início">
-      <img src="./assets/logo.png" alt="Logo" class="brand-logo" onerror="this.style.display='none'">
+      <img src="./logo.png" alt="Logo" class="brand-logo" onerror="this.style.display='none'">
     </a>
     <span class="system-status"><i></i> SISTEMA DE ACESSO</span>
   </header>
@@ -101,24 +45,29 @@
           <span class="live-dot">ONLINE</span>
         </div>
 
-        <!-- LOGO CENTRALIZADA COM EFEITO GLITCH ACIMA DOS DADOS DE LOGIN -->
+        <!-- LOGO CENTRALIZADA NA RAIZ COM GLITCH -->
         <div class="glitch-logo-container">
-          <img src="./assets/logo.png" alt="Logo do Evento" class="glitch-logo">
+          <img src="./logo.png" alt="Logo do Evento" class="glitch-logo">
         </div>
 
         <div class="tabs" role="tablist" aria-label="Autenticação">
           <button class="tab active" id="loginTab" type="button">ENTRAR</button>
           <button class="tab" id="signupTab" type="button">CRIAR CONTA</button>
         </div>
+
         <form id="authForm">
           <label for="displayName" id="displayNameLabel" class="hidden">Nome completo</label>
           <input id="displayName" name="displayName" type="text" autocomplete="name" placeholder="NOME COMPLETO" class="hidden" maxlength="100">
+          
           <label for="email">E-MAIL</label>
           <input id="email" name="email" type="email" autocomplete="email" placeholder="voce@exemplo.com" required>
+          
           <label for="password">SENHA</label>
           <input id="password" name="password" type="password" autocomplete="current-password" placeholder="MÍNIMO DE 8 CARACTERES" minlength="8" required>
+          
           <button class="button primary full" type="submit" id="authSubmit">ENTRAR NO SISTEMA <span>↗</span></button>
         </form>
+
         <p id="authMessage" class="message" role="status" aria-live="polite"></p>
         <p class="fine-print">O acesso é individual. Não compartilhe seu QR Code.</p>
       </div>
@@ -134,23 +83,53 @@
         <button id="logoutButton" class="button ghost" type="button">SAIR ↗</button>
       </div>
 
+      <!-- PAINEL CONVIDADO -->
       <section id="guestPanel" class="hidden">
         <div class="section-heading">
           <div><p class="eyebrow">ÁREA DO CONVIDADO</p><h2>SEU INGRESSO</h2></div>
           <span class="status-pill" id="guestStatus">AGUARDANDO</span>
         </div>
+
         <div id="noTicketCard" class="panel claim-panel">
-          <div class="claim-symbol">＋</div>
+          <div class="claim-symbol">⚡</div>
           <div class="claim-copy">
-            <h3>VOCÊ TEM UM CÓDIGO?</h3>
-            <p class="muted">Digite o código de 9 dígitos recebido após a compra do ingresso.</p>
+            <h3>GARANTA SEU INGRESSO</h3>
+            <p class="muted">Compre via Pix por R$ 50,00 ou resgate um código recebido.</p>
           </div>
+
+          <button id="buyPixBtn" class="button primary full buy-pix-btn" type="button">
+            COMPRAR INGRESSO VIA PIX (R$ 50,00) ⚡
+          </button>
+
+          <div class="divider-text">─── OU SE VOCÊ JÁ POSSUI UM CÓDIGO ───</div>
+
           <form id="claimForm" class="claim-form">
             <label for="ticketCode">CÓDIGO DE ACESSO</label>
-            <input id="ticketCode" inputmode="numeric" autocomplete="one-time-code" maxlength="9" pattern="[0-9]{9}" placeholder="000 000 000" required>
-            <button class="button primary full" type="submit">RESGATAR INGRESSO ↗</button>
+            <input id="ticketCode" inputmode="numeric" autocomplete="one-time-code" maxlength="9" pattern="[0-9]{9}" placeholder="000 000 000">
+            <button class="button ghost full" type="submit">RESGATAR COM CÓDIGO ↗</button>
           </form>
         </div>
+
+        <!-- MODAL / CARD PIX -->
+        <div id="pixPaymentCard" class="panel pix-card hidden">
+          <div class="panel-heading">
+            <span class="panel-kicker">PAGAMENTO PIX</span>
+            <span class="live-dot warning-dot">AGUARDANDO</span>
+          </div>
+          <h3>PAGUE COM O QR CODE ABAIXO</h3>
+          <p class="muted">Abra o app do seu banco e escaneie ou copie o código Pix.</p>
+
+          <img id="pixQrImg" class="pix-qr-img" src="" alt="QR Code Pix">
+
+          <input id="pixCopyPasteInput" class="pix-copy-input" readonly type="text" value="">
+          <button id="copyPixBtn" class="button primary full" type="button">COPIAR CÓDIGO PIX 📋</button>
+
+          <p class="fine-print pix-notice">
+            ⏳ O sistema identificará o pagamento automaticamente e liberará seu ingresso nesta tela.
+          </p>
+        </div>
+
+        <!-- CARD TICKET DIGITAL -->
         <div id="ticketCard" class="panel ticket-card hidden">
           <div class="ticket-top"><span class="panel-kicker">DIGITAL PASS</span><span class="ticket-stamp">VALIDAÇÃO ÚNICA</span></div>
           <div class="ticket-main">
@@ -167,6 +146,7 @@
         </div>
       </section>
 
+      <!-- PAINEL ADMIN -->
       <section id="adminPanel" class="hidden">
         <div class="section-heading">
           <div><p class="eyebrow">NÍVEL DE ACESSO // ADMIN</p><h2>CONTROLE DE ENTRADA</h2></div>
