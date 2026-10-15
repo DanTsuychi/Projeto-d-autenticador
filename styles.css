@@ -1,14 +1,14 @@
 /* ========================================================
-   ESTILOS PROJETO D — FUNDO PRETO & NEON VERMELHO FALHADO
+   ESTILOS PROJETO D — 100% NEON VERMELHO & PRETO
    ======================================================== */
 
 :root {
   --bg-color: #020202;
-  --panel-bg: rgba(12, 12, 12, 0.85);
-  --panel-border: rgba(255, 20, 60, 0.25);
+  --panel-bg: rgba(12, 12, 12, 0.88);
+  --panel-border: rgba(255, 20, 60, 0.3);
   --neon-red: #ff143c;
-  --neon-red-glow: rgba(255, 20, 60, 0.6);
-  --neon-cyan: #00ffcc;
+  --neon-red-bright: #ff0055;
+  --neon-red-glow: rgba(255, 0, 85, 0.5);
   --text-main: #f0f0f0;
   --text-muted: #888888;
 }
@@ -45,7 +45,7 @@ body {
   transform: translateX(-50%);
   width: 650px;
   height: 650px;
-  background: radial-gradient(circle, rgba(255, 0, 55, 0.35) 0%, rgba(150, 0, 30, 0.08) 65%, transparent 85%);
+  background: radial-gradient(circle, rgba(255, 0, 55, 0.38) 0%, rgba(150, 0, 30, 0.1) 65%, transparent 85%);
 }
 
 .ambient-two {
@@ -53,7 +53,7 @@ body {
   right: -10%;
   width: 550px;
   height: 550px;
-  background: radial-gradient(circle, rgba(220, 0, 45, 0.28) 0%, transparent 75%);
+  background: radial-gradient(circle, rgba(220, 0, 45, 0.3) 0%, transparent 75%);
 }
 
 /* Animação de Neons com Falha */
@@ -121,20 +121,20 @@ body {
   align-items: center;
   padding: 1rem 2rem;
   border-bottom: 1px solid var(--panel-border);
-  background: rgba(5, 5, 5, 0.8);
+  background: rgba(5, 5, 5, 0.85);
   backdrop-filter: blur(10px);
 }
 
 .brand-logo {
   height: 40px;
   width: auto;
-  filter: drop-shadow(0 0 6px var(--neon-red));
+  filter: drop-shadow(0 0 8px var(--neon-red));
 }
 
 .system-status {
   font-family: 'Orbitron', sans-serif;
   font-size: 0.75rem;
-  color: var(--neon-red);
+  color: var(--neon-red-bright);
   letter-spacing: 1px;
 }
 
@@ -142,9 +142,9 @@ body {
   display: inline-block;
   width: 8px;
   height: 8px;
-  background: var(--neon-red);
+  background: var(--neon-red-bright);
   border-radius: 50%;
-  box-shadow: 0 0 8px var(--neon-red);
+  box-shadow: 0 0 10px var(--neon-red-bright);
   margin-right: 6px;
   animation: redFlicker 2s infinite;
 }
@@ -155,12 +155,12 @@ body {
   border-radius: 12px;
   padding: 1.8rem;
   backdrop-filter: blur(16px);
-  box-shadow: 0 0 25px rgba(0, 0, 0, 0.8), inset 0 0 15px rgba(255, 20, 60, 0.05);
+  box-shadow: 0 0 25px rgba(0, 0, 0, 0.85), inset 0 0 15px rgba(255, 20, 60, 0.08);
   margin-bottom: 1.5rem;
 }
 
 /* --------------------------------------------------------
-   EFEITO GLITCH NA LOGO CENTRAL
+   EFEITO GLITCH RED/WHITE NA LOGO CENTRAL
    -------------------------------------------------------- */
 .glitch-logo-container {
   display: flex;
@@ -187,11 +187,11 @@ body {
   }
   2% {
     transform: translate(-3px, 2px);
-    filter: drop-shadow(-3px 0 var(--neon-red)) drop-shadow(3px 0 var(--neon-cyan));
+    filter: drop-shadow(-3px 0 var(--neon-red-bright)) drop-shadow(3px 0 #ffffff);
   }
   4% {
     transform: translate(3px, -2px);
-    filter: drop-shadow(3px -2px var(--neon-cyan));
+    filter: drop-shadow(3px -2px #ffffff);
   }
   6% {
     transform: translate(0);
@@ -203,7 +203,7 @@ body {
   }
   52% {
     transform: translate(2px, 1px);
-    filter: drop-shadow(2px -1px var(--neon-cyan));
+    filter: drop-shadow(2px -1px #ffffff);
   }
   54% {
     transform: translate(0);
@@ -234,9 +234,9 @@ body {
 }
 
 .tab.active {
-  color: var(--neon-cyan);
-  border-bottom-color: var(--neon-cyan);
-  text-shadow: 0 0 8px rgba(0, 255, 204, 0.5);
+  color: var(--neon-red-bright);
+  border-bottom-color: var(--neon-red-bright);
+  text-shadow: 0 0 10px var(--neon-red-glow);
 }
 
 label {
@@ -262,8 +262,8 @@ input {
 }
 
 input:focus {
-  border-color: var(--neon-cyan);
-  box-shadow: 0 0 8px rgba(0, 255, 204, 0.2);
+  border-color: var(--neon-red-bright);
+  box-shadow: 0 0 10px rgba(255, 0, 85, 0.3);
 }
 
 .button {
@@ -280,36 +280,33 @@ input:focus {
   margin-top: 1rem;
 }
 
-.button.primary {
-  background: var(--neon-cyan);
-  color: #000;
-  box-shadow: 0 0 12px rgba(0, 255, 204, 0.3);
+.button.primary,
+.buy-pix-btn {
+  background: var(--neon-red-bright) !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 15px var(--neon-red-glow);
 }
 
-.button.primary:hover {
-  background: #00cca3;
-  box-shadow: 0 0 18px rgba(0, 255, 204, 0.5);
+.button.primary:hover,
+.buy-pix-btn:hover {
+  background: #e0004c !important;
+  box-shadow: 0 0 22px rgba(255, 0, 85, 0.8);
 }
 
 .button.ghost {
   background: transparent;
-  border: 1px solid #333;
+  border: 1px solid var(--panel-border);
   color: #ccc;
 }
 
 .button.ghost:hover {
-  border-color: #555;
+  border-color: var(--neon-red);
   color: #fff;
+  box-shadow: 0 0 10px rgba(255, 20, 60, 0.2);
 }
 
 .button.full {
   width: 100%;
-}
-
-.buy-pix-btn {
-  background: var(--neon-cyan) !important;
-  color: #000 !important;
-  font-weight: bold;
 }
 
 /* --------------------------------------------------------
@@ -317,8 +314,8 @@ input:focus {
    -------------------------------------------------------- */
 .pix-card {
   text-align: center;
-  border-color: var(--neon-cyan);
-  box-shadow: 0 0 20px rgba(0, 255, 204, 0.2);
+  border-color: var(--neon-red-bright);
+  box-shadow: 0 0 25px rgba(255, 0, 85, 0.25);
 }
 
 .pix-qr-img {
@@ -326,7 +323,7 @@ input:focus {
   height: 200px;
   margin: 1.2rem auto;
   display: block;
-  border: 2px solid var(--neon-cyan);
+  border: 2px solid var(--neon-red-bright);
   border-radius: 8px;
   background: #fff;
   padding: 6px;
@@ -334,7 +331,7 @@ input:focus {
 
 .pix-copy-input {
   background: #080808;
-  color: var(--neon-cyan);
+  color: var(--neon-red-bright);
   border: 1px solid #333;
   text-align: center;
   font-size: 0.85rem;
@@ -350,7 +347,7 @@ input:focus {
 
 .pix-notice {
   margin-top: 1rem;
-  color: var(--neon-cyan);
+  color: var(--neon-red-bright);
 }
 
 .warning-dot {
@@ -389,9 +386,9 @@ th {
   padding: 4px 8px;
   border-radius: 4px;
   background: #111;
-  border: 1px solid #333;
+  border: 1px solid var(--panel-border);
   font-size: 0.75rem;
-  color: var(--neon-cyan);
+  color: var(--neon-red-bright);
 }
 
 .hidden {
