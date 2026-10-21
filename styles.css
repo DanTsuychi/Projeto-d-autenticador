@@ -1,5 +1,5 @@
 /* ========================================================
-   ESTILOS PROJETO D — 100% NEON VERMELHO & PRETO
+   ESTILOS PROJETO D — 100% NEON VERMELHO, PRETO E CYBERPUNK
    ======================================================== */
 
 :root {
@@ -56,7 +56,6 @@ body {
   background: radial-gradient(circle, rgba(220, 0, 45, 0.3) 0%, transparent 75%);
 }
 
-/* Animação de Neons com Falha */
 .faulty-neon {
   animation: redFlicker 3.5s infinite linear;
 }
@@ -318,26 +317,6 @@ input:focus {
   box-shadow: 0 0 25px rgba(255, 0, 85, 0.25);
 }
 
-.pix-qr-img {
-  width: 200px;
-  height: 200px;
-  margin: 1.2rem auto;
-  display: block;
-  border: 2px solid var(--neon-red-bright);
-  border-radius: 8px;
-  background: #fff;
-  padding: 6px;
-}
-
-.pix-copy-input {
-  background: #080808;
-  color: var(--neon-red-bright);
-  border: 1px solid #333;
-  text-align: center;
-  font-size: 0.85rem;
-  margin-bottom: 0.5rem;
-}
-
 .divider-text {
   margin: 1.5rem 0;
   color: #555;
@@ -393,4 +372,154 @@ th {
 
 .hidden {
   display: none !important;
+}
+
+/* ========================================================
+   MODAL CYBERPUNK DE VALIDAÇÃO DE QR CODE
+   ======================================================== */
+.cyber-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(2, 2, 2, 0.92);
+  backdrop-filter: blur(12px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  animation: cyberFadeIn 0.25s ease-out;
+}
+
+.cyber-card {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  background: #050805;
+  border: 2px solid var(--cyber-theme-color, #00ff66);
+  box-shadow: 0 0 35px var(--cyber-glow-color, rgba(0, 255, 102, 0.4)),
+              inset 0 0 25px var(--cyber-glow-color, rgba(0, 255, 102, 0.15));
+  padding: 2rem;
+  text-align: center;
+  clip-path: polygon(
+    0 15px, 15px 0, 
+    calc(100% - 15px) 0, 100% 15px, 
+    100% calc(100% - 15px), calc(100% - 15px) 100%, 
+    15px 100%, 0 calc(100% - 15px)
+  );
+  animation: cyberPop 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.cyber-card.success {
+  --cyber-theme-color: #00ff66;
+  --cyber-glow-color: rgba(0, 255, 102, 0.5);
+  background: #030f06;
+}
+
+.cyber-card.warning {
+  --cyber-theme-color: #ff0033;
+  --cyber-glow-color: rgba(255, 0, 51, 0.6);
+  background: #120305;
+}
+
+.cyber-corner {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border: 2px solid var(--cyber-theme-color, #00ff66);
+}
+.cyber-corner.top-left { top: 4px; left: 4px; border-right: none; border-bottom: none; }
+.cyber-corner.top-right { top: 4px; right: 4px; border-left: none; border-bottom: none; }
+.cyber-corner.bottom-left { bottom: 4px; left: 4px; border-right: none; border-top: none; }
+.cyber-corner.bottom-right { bottom: 4px; right: 4px; border-left: none; border-top: none; }
+
+.cyber-scanlines {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  pointer-events: none;
+  background: linear-gradient(rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.5) 50%);
+  background-size: 100% 4px;
+  opacity: 0.7;
+}
+
+.cyber-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.7rem;
+  color: var(--cyber-theme-color);
+  letter-spacing: 1px;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px dashed var(--cyber-theme-color);
+  padding-bottom: 0.5rem;
+}
+
+.cyber-icon {
+  font-size: 3.5rem;
+  margin-bottom: 0.8rem;
+  filter: drop-shadow(0 0 12px var(--cyber-theme-color));
+}
+
+.cyber-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #ffffff;
+  text-shadow: 0 0 12px var(--cyber-theme-color);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 0.5rem;
+}
+
+.cyber-subtitle {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 1.1rem;
+  color: #dddddd;
+  font-weight: 600;
+  margin-bottom: 1.8rem;
+  letter-spacing: 1px;
+}
+
+.cyber-progress-bar {
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+  border: 1px solid var(--cyber-theme-color);
+}
+
+.cyber-progress-fill {
+  height: 100%;
+  width: 100%;
+  background: var(--cyber-theme-color);
+  box-shadow: 0 0 10px var(--cyber-theme-color);
+  transform-origin: left;
+  animation: cyberTimer 3s linear forwards;
+}
+
+.cyber-microcopy {
+  font-size: 0.65rem;
+  color: #888888;
+  letter-spacing: 1px;
+  font-family: 'Orbitron', sans-serif;
+}
+
+@keyframes cyberFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes cyberPop {
+  from { transform: scale(0.85) translateY(10px); opacity: 0; }
+  to { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+@keyframes cyberTimer {
+  from { transform: scaleX(1); }
+  to { transform: scaleX(0); }
 }
