@@ -13,6 +13,7 @@
 
   let authMode = "login";
   let html5QrcodeScanner = null;
+  let isProcessingScan = false;
   let elements = {};
 
   if (document.readyState === "loading") {
@@ -67,7 +68,13 @@
       scanResult: document.getElementById("scanResult"),
       refreshTicketsButton: document.getElementById("refreshTicketsButton"),
       ticketsTableBody: document.getElementById("ticketsTableBody"),
-      appMessage: document.getElementById("appMessage")
+      appMessage: document.getElementById("appMessage"),
+      cyberOverlay: document.getElementById("cyberOverlay"),
+      cyberCard: document.getElementById("cyberCard"),
+      cyberIcon: document.getElementById("cyberIcon"),
+      cyberTitle: document.getElementById("cyberTitle"),
+      cyberSubtitle: document.getElementById("cyberSubtitle"),
+      cyberProgress: document.getElementById("cyberProgress")
     };
   }
 
@@ -230,7 +237,6 @@
       if (elements.noTicketCard) elements.noTicketCard.classList.add("hidden");
       if (elements.pixPaymentCard) elements.pixPaymentCard.classList.remove("hidden");
     }).catch(() => {
-      // Caso o navegador bloqueie a cópia direta sem permissão
       if (elements.noTicketCard) elements.noTicketCard.classList.add("hidden");
       if (elements.pixPaymentCard) elements.pixPaymentCard.classList.remove("hidden");
     });
@@ -280,11 +286,11 @@
       });
       new window.QRCode(elements.qrCode, {
         text: qrData,
-        width: 180,
-        height: 180,
+        width: 220,
+        height: 220,
         colorDark: "#000000",
         colorLight: "#ffffff",
-        correctLevel: window.QRCode.CorrectLevel.H
+        correctLevel: window.QRCode.CorrectLevel.M
       });
     }
   }
@@ -385,7 +391,7 @@
     }
   }
 
-  // LEITOR DE QR CODE COM CÂMERA
+  // LEITOR DE QR CODE COM CÂMERA E OVERLAY CYBERPUNK
   async function startCameraScanner() {
     if (typeof Html5Qrcode === "undefined") {
       if (elements.scanResult) elements.scanResult.textContent = "BIBLIOTECA DE CÂMERA NÃO CARREGADA";
@@ -397,14 +403,38 @@
         html5QrcodeScanner = new Html5Qrcode("reader");
       }
 
-      await html5QrcodeScanner.start(
-        { facingMode: "environment" },
-        { fps: 10, qrbox: { width: 220, height: 220 } },
-        async (decodedText) => {
-          await processScannedQrData(decodedText);
+      const config = {
+        fps: 15,
+        qrbox: function (viewfinderWidth, viewfinderHeight) {
+          const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
+          const edgeSize = Math.floor(minEdge * 0.7);
+          return { width: edgeSize, height: edgeSize };
         },
-        () => {}
-      );
+        aspectRatio: 1.0,
+        experimentalFeatures: {
+          useBarCodeDetectorIfSupported: true
+        }
+      };
+
+      try {
+        await html5QrcodeScanner.start(
+          { facingMode: { exact: "environment" } },
+          config,
+          async (decodedText) => {
+            await processScannedQrData(decodedText);
+          },
+          () => {}
+        );
+      } catch (fallbackErr) {
+        await html5QrcodeScanner.start(
+          { facingMode: "environment" },
+          config,
+          async (decodedText) => {
+            await processScannedQrData(decodedText);
+          },
+          () => {}
+        );
+      }
 
       if (elements.startScannerButton) elements.startScannerButton.disabled = true;
       if (elements.stopScannerButton) elements.stopScannerButton.disabled = false;
@@ -428,10 +458,13 @@
   }
 
   async function processScannedQrData(qrData) {
+    if (isProcessingScan) return;
+    isProcessingScan = true;
+
     try {
       const parsed = JSON.parse(qrData);
       if (!parsed.ticket_id || !parsed.qr_token) {
-        if (elements.scanResult) elements.scanResult.innerHTML = '<span style="color: #ff3366;">❌ DADOS DO QR CODE INVÁLIDOS</span>';
+        triggerCyberModal("warning", "❌ ERRO DE LEITURA", "DADOS DO QR CODE INVÁLIDOS");
         return;
       }
 
@@ -445,16 +478,79 @@
       const res = data && data[0] ? data[0] : { result: "INVALID", guest_name: "" };
 
       if (res.result === "AUTHORIZED") {
-        if (elements.scanResult) elements.scanResult.innerHTML = '<span style="color: #ff0055; font-weight: bold;">✅ ENTRADA AUTORIZADA!<br>CONVIDADO: ' + res.guest_name + '</span>';
+        triggerCyberModal(
+          "success", 
+          "Ingresso validado, boa festa!", 
+          `CONVIDADO: ${res.guest_name.toUpperCase()}`
+        );
       } else if (res.result === "ALREADY_USED") {
-        if (elements.scanResult) elements.scanResult.innerHTML = '<span style="color: #ffcc00; font-weight: bold;">⚠️ INGRESSO JÁ UTILIZADO!<br>CONVIDADO: ' + res.guest_name + '</span>';
+        triggerCyberModal(
+          "warning", 
+          "ingresso já resgatado, próximo?", 
+          `TITULAR: ${res.guest_name.toUpperCase()}`
+        );
       } else {
-        if (elements.scanResult) elements.scanResult.innerHTML = '<span style="color: #ff3366; font-weight: bold;">❌ INGRESSO INVÁLIDO</span>';
+        triggerCyberModal("warning", "Ingresso Inválido", "CÓDIGO NÃO LOCALIZADO NO SISTEMA");
       }
 
       await loadAdminTicketList();
     } catch (err) {
-      if (elements.scanResult) elements.scanResult.innerHTML = '<span style="color: #ff3366;">❌ ERRO NA LEITURA: ' + (err.message || err) + '</span>';
+      triggerCyberModal("warning", "Erro no Sistema", err.message || "Tente novamente.");
+    }
+  }
+
+  function triggerCyberModal(type, title, subtitle) {
+    if (!elements.cyberOverlay) return;
+
+    // Bipe tático sintetizado via Web Audio API
+    playCyberBeep(type === "success" ? 880 : 330);
+
+    // Feedback de Vibração no celular
+    if ("vibrate" in navigator) {
+      if (type === "success") {
+        navigator.vibrate([100, 50, 100]); // Pulsos curtos para Sucesso
+      } else {
+        navigator.vibrate([300, 100, 300]); // Vibração mais longa para Alerta
+      }
+    }
+
+    elements.cyberCard.className = `cyber-card ${type}`;
+    elements.cyberIcon.textContent = type === "success" ? "⚡" : "⚠️";
+    elements.cyberTitle.textContent = title;
+    elements.cyberSubtitle.textContent = subtitle;
+
+    if (elements.cyberProgress) {
+      elements.cyberProgress.style.animation = 'none';
+      elements.cyberProgress.offsetHeight;
+      elements.cyberProgress.style.animation = 'cyberTimer 3s linear forwards';
+    }
+
+    elements.cyberOverlay.classList.remove("hidden");
+
+    setTimeout(() => {
+      elements.cyberOverlay.classList.add("hidden");
+      isProcessingScan = false;
+    }, 3000);
+  }
+
+  function playCyberBeep(freq) {
+    try {
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      
+      osc.type = "sawtooth";
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.25);
+      
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.25);
+    } catch (e) {
+      // Ignora caso permissão de áudio esteja desativada
     }
   }
 
