@@ -108,7 +108,7 @@
           </form>
         </div>
 
-        <!-- CARD PIX / SOLICITAR CÓDIGO (EXIBIDO APÓS CLICAR NO BOTÃO PIX) -->
+        <!-- CARD PIX / SOLICITAR CÓDIGO -->
         <div id="pixPaymentCard" class="panel pix-card hidden">
           <div class="panel-heading">
             <span class="panel-kicker">CHAVE PIX COPIADA</span>
@@ -188,14 +188,41 @@
           <div class="panel-heading"><span class="panel-kicker">03 / REGISTRO DE INGRESSOS</span><button id="refreshTicketsButton" class="button ghost small" type="button">ATUALIZAR ↻</button></div>
           <div class="table-wrap">
             <table>
-              <thead><tr><th>CONVIDADO</th><th>STATUS</th><th>CRIADO EM</th><th>UTILIZADO EM</th></tr></thead>
-              <tbody id="ticketsTableBody"><tr><td colspan="4" class="muted">Carregando registros…</td></tr></tbody>
+              <thead><tr><th>CONVIDADO</th><th>CÓDIGO</th><th>STATUS</th><th>CRIADO EM</th><th>UTILIZADO EM</th></tr></thead>
+              <tbody id="ticketsTableBody"><tr><td colspan="5" class="muted">Carregando registros…</td></tr></tbody>
             </table>
           </div>
         </div>
       </section>
       <p id="appMessage" class="message" role="status" aria-live="polite"></p>
     </section>
+
+    <!-- OVERLAY CYBERPUNK DE VALIDAÇÃO DE INGRESSO -->
+    <div id="cyberOverlay" class="cyber-overlay hidden" role="dialog" aria-modal="true">
+      <div id="cyberCard" class="cyber-card">
+        <div class="cyber-scanlines"></div>
+        <div class="cyber-corner top-left"></div>
+        <div class="cyber-corner top-right"></div>
+        <div class="cyber-corner bottom-left"></div>
+        <div class="cyber-corner bottom-right"></div>
+        
+        <div class="cyber-header">
+          <span class="cyber-status-tag">// PROTOCOLO DE ACESSO</span>
+          <span class="cyber-time">SYSTEM_LOG :: OK</span>
+        </div>
+
+        <div class="cyber-content">
+          <div id="cyberIcon" class="cyber-icon"></div>
+          <h2 id="cyberTitle" class="cyber-title"></h2>
+          <p id="cyberSubtitle" class="cyber-subtitle"></p>
+        </div>
+
+        <div class="cyber-footer">
+          <div class="cyber-progress-bar"><div id="cyberProgress" class="cyber-progress-fill"></div></div>
+          <span class="cyber-microcopy">VERIFICADO PELA PORTARIA AUTOMATIZADA</span>
+        </div>
+      </div>
+    </div>
   </main>
 
   <footer class="footer"><span>ACCESS CONTROL SYSTEM <b>●</b></span></footer>
